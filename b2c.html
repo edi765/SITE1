@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Abonamente B2C – GetASubscription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{gold1:'#a67c00',gold2:'#bf9b30',gold3:'#ffbf00',gold4:'#ffcf40',gold5:'#ffdc73',royal:'#6a0dad'},boxShadow:{'gold-glow':'0 0 20px rgba(191,155,48,0.45), inset 0 0 12px rgba(255,207,64,0.35)','purple-glow':'0 0 24px rgba(106,13,173,0.45), inset 0 0 12px rgba(106,13,173,0.35)'},backgroundImage:{'gold-gradient':'linear-gradient(135deg,#a67c00 0%,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73 100%)','purple-gold':'linear-gradient(135deg,#2a1738 0%,#6a0dad 40%,#bf9b30 100%)'}}}}</script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="calculator.js"></script>
+  <script src="modal-calculator.js"></script>
+  <script src="affiliate-tracking.js"></script>
+  <style>
+    :root{color-scheme:dark}
+    .light-mode{color-scheme:light}
+    body{background:#000;color:#e7e7e7;font-family:'Montserrat','Poppins',system-ui;transition:background .3s ease,color .3s ease}
+    .btn-gold{background-image:linear-gradient(135deg,#a67c00,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73);color:#111;box-shadow:0 0 0 1px rgba(255,207,64,.35) inset,0 8px 24px rgba(255,191,0,.25);transition:transform .2s,box-shadow .2s}
+    .btn-gold:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,220,115,.55) inset,0 12px 32px rgba(255,207,64,.35)}
+    .border-gold{border:1px solid rgba(191,155,48,.35);box-shadow:inset 0 0 12px rgba(191,155,48,.15),0 0 24px rgba(191,155,48,.12)}
+    .glow-purple{box-shadow:0 0 24px rgba(106,13,173,.45), inset 0 0 12px rgba(106,13,173,.35)}
+    @keyframes pulseGlow{0%,100%{box-shadow:0 0 24px rgba(106,13,173,.45),inset 0 0 12px rgba(106,13,173,.35)}50%{box-shadow:0 0 36px rgba(106,13,173,.60),inset 0 0 16px rgba(106,13,173,.45)}}
+    .animate-pulse-glow{animation:pulseGlow 3.2s ease-in-out infinite}
+    .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s,transform .7s}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .text-gold-gradient{background:linear-gradient(135deg,#a67c00,#ffbf00,#ffdc73);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .tier-card{border:2px solid rgba(191,155,48,.4);transition:all .3s}
+    .tier-card:hover{transform:translateY(-4px);box-shadow:0 8px 32px rgba(255,207,64,.3)}
+    header{background:rgba(0,0,0,0.4);border-bottom:1px solid rgba(191,155,48,.2);transition:background .3s ease,border-color .3s ease}
+    .hero-banner{position:relative;overflow:hidden;background:#050505;transition:background .3s ease}
+    .hero-banner::before{content:"";position:absolute;inset:-35%;background:radial-gradient(circle at 25% 20%,rgba(191,155,48,.25),transparent 55%),radial-gradient(circle at 75% 30%,rgba(106,13,173,.25),transparent 55%);animation:heroGradientB2C 18s ease-in-out infinite alternate;pointer-events:none;transition:background .3s ease}
+    .hero-banner>.hero-content{position:relative;z-index:1;}
+    @keyframes heroGradientB2C{to{transform:translate3d(-6%,6%,0) scale(1.08);}}
+    /* Account Dropdown Animation */
+    #accountDropdown{animation:slideDown 0.2s ease-out}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    /* Modal Animation */
+    #loginModal,#registerModal{transition:opacity 0.3s ease}
+    #loginModal.hidden,#registerModal.hidden{opacity:0;pointer-events:none}
+    #loginModal:not(.hidden),#registerModal:not(.hidden){opacity:1}
+    #loginModal>div:last-child,#registerModal>div:last-child{animation:slideUp 0.3s ease-out}
+    @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .theme-toggle{width:36px;height:36px;border-radius:9999px;border:1px solid rgba(191,155,48,.45);background:rgba(255,255,255,0.06);color:#facc15;display:inline-flex;align-items:center;justify-content:center;transition:transform .2s ease,box-shadow .2s ease,background .2s ease,color .2s ease}
+    .theme-toggle:hover{transform:translateY(-1px);box-shadow:0 0 12px rgba(191,155,48,.3)}
+    .theme-toggle i{font-size:.95rem}
+    .theme-toggle .icon-moon{display:none}
+
+    .light-mode body{background:#f6f5f0;color:#1f1f1f}
+    .light-mode header{background:rgba(255,255,255,0.85);border-bottom:1px solid rgba(191,155,48,.3)}
+    .light-mode .hero-banner{background:#faf7ef}
+    .light-mode .hero-banner::before{background:radial-gradient(circle at 25% 20%,rgba(255,210,150,.35),transparent 55%),radial-gradient(circle at 75% 30%,rgba(180,150,255,.3),transparent 55%)}
+    .light-mode .border-gold{box-shadow:inset 0 0 12px rgba(191,155,48,.08),0 0 18px rgba(191,155,48,.1)}
+    .light-mode .bg-black{background:#ffffff!important}
+    .light-mode .bg-black\/40{background:rgba(255,255,255,0.85)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/60{background:rgba(255,255,255,0.9)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/80{background:rgba(255,255,255,0.94)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/90{background:rgba(255,255,255,0.96)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/95{background:rgba(255,255,255,0.98)!important;color:#1f1f1f!important}
+    .light-mode .text-zinc-300{color:#394150!important}
+    .light-mode .text-zinc-400{color:#4b5563!important}
+    .light-mode .text-zinc-500{color:#6b7280!important}
+    .light-mode [class*="border-yellow-600/20"]{border-color:rgba(191,155,48,0.28)!important}
+    .light-mode .theme-toggle{background:rgba(255,255,255,0.95);color:#7c5800;border-color:rgba(191,155,48,.45)}
+    .light-mode .theme-toggle .icon-sun{display:none}
+    .light-mode .theme-toggle .icon-moon{display:inline-block}
+    .light-mode footer{background:#faf7ef;border-top:1px solid rgba(191,155,48,0.2);color:#1f1f1f}
+  </style>
+</head>
+<body>
+  <header class="fixed top-0 inset-x-0 z-50 backdrop-blur bg-black/40 border-b border-yellow-600/20">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-16 flex items-center justify-between relative">
+      <a href="index.html" class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gold-gradient"></div><span class="text-xl font-semibold tracking-widest bg-gold-gradient bg-clip-text text-transparent">GetASubscription</span></a>
+      <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm">
+        <a href="index.html" class="hover:text-gold4 transition">Acasă</a>
+        <a href="b2b.html" class="hover:text-gold4 transition">B2B</a>
+        <a href="b2c.html" class="hover:text-gold4 transition text-gold4">B2C</a>
+        <a href="cat1.html" class="hover:text-gold4 transition">Businessuri</a>
+        <a href="cat2.html" class="hover:text-gold4 transition">Servicii</a>
+        <a href="cat3.html" class="hover:text-gold4 transition">Investitori</a>
+        <a href="calls.html" class="hover:text-gold4 transition">Call-uri</a>
+        <a href="ai.html" class="hover:text-gold4 transition">AI</a>
+        <a href="subscriptions.html" class="hover:text-gold4 transition">Subscriptions</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" type="button" class="theme-toggle" aria-label="Comută modul luminos">
+          <i class="fa-solid fa-sun icon-sun"></i>
+          <i class="fa-solid fa-moon icon-moon"></i>
+        </button>
+        <!-- Account Icon & Dropdown -->
+        <div class="relative" id="accountDropdownContainer">
+          <button id="accountBtn" class="p-2 border border-yellow-600/30 rounded-full text-gold4 hover:shadow-gold-glow transition relative">
+            <i class="fa-solid fa-user text-lg"></i>
+          </button>
+          <!-- Dropdown Menu -->
+          <div id="accountDropdown" class="hidden absolute right-0 mt-2 w-56 bg-black border-gold rounded-xl shadow-gold-glow overflow-hidden z-50">
+            <div id="accountMenuLoggedOut" class="hidden">
+              <button id="openLoginBtn" class="w-full text-left px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-sign-in-alt text-gold4"></i>
+                <span>Autentificare</span>
+              </button>
+              <button id="openRegisterBtn" class="w-full text-left px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-user-plus text-gold4"></i>
+                <span>Înregistrare</span>
+              </button>
+            </div>
+            <div id="accountMenuLoggedIn" class="hidden">
+              <div class="px-4 py-3 border-b border-yellow-600/20">
+                <p class="text-sm text-zinc-400">Conectat ca</p>
+                <p id="userNameDisplay" class="font-semibold text-gold4"></p>
+                <p id="userEmailDisplay" class="text-xs text-zinc-500"></p>
+              </div>
+              <a href="dashboard.html" id="profileLink" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-user-circle text-gold4"></i>
+                <span>Profil</span>
+              </a>
+              <a href="dashboard.html" id="subscriptionsLink" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-box text-gold4"></i>
+                <span>Abonamentele mele</span>
+              </a>
+              <a href="#" id="settingsLink" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-cog text-gold4"></i>
+                <span>Setări</span>
+              </a>
+              <button id="logoutBtn" class="w-full text-left px-4 py-3 hover:bg-red-500/10 transition flex items-center gap-3 text-red-400">
+                <i class="fa-solid fa-sign-out-alt"></i>
+                <span>Deconectare</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button id="menuBtn" class="md:hidden p-2 border border-yellow-600/30 rounded text-gold4"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="md:hidden hidden border-t border-yellow-600/20 bg-black/90">
+      <div class="max-w-7xl mx-auto px-4 py-3 grid grid-cols-1 gap-2 text-sm">
+        <a href="index.html" class="py-2">Acasă</a>
+        <a href="b2b.html" class="py-2">B2B</a>
+        <a href="b2c.html" class="py-2 text-gold4">B2C</a>
+        <a href="cat1.html" class="py-2">Businessuri</a>
+        <a href="cat2.html" class="py-2">Servicii</a>
+        <a href="cat3.html" class="py-2">Investitori</a>
+        <a href="calls.html" class="py-2">Call-uri</a>
+        <a href="ai.html" class="py-2">AI</a>
+        <a href="subscriptions.html" class="py-2">Subscriptions</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24 pb-20">
+    <section class="hero-banner py-16 rounded-[32px] border border-yellow-600/20 bg-black/60 mx-4 md:mx-6 lg:mx-8">
+      <div class="hero-content max-w-7xl mx-auto px-4 md:px-6 lg:px-8 text-center">
+        <div class="reveal mb-10">
+          <h1 class="text-4xl md:text-6xl font-bold text-gold-gradient mb-4">🎁 Mystery Boxes & More!</h1>
+          <p class="text-zinc-300 text-lg max-w-2xl mx-auto">Surprize premium, colecții exclusive și experiențe unice! Alege categoria ta preferată și descoperă ce ți se potrivește.</p>
+          <div class="mt-6 border-gold rounded-xl p-4 bg-black/40 max-w-3xl mx-auto">
+            <p class="text-gold4 font-semibold mb-2"><i class="fa-solid fa-star mr-2"></i>Garantie Valoare</p>
+            <p class="text-sm text-zinc-300">Peste <strong class="text-gold4">90%</strong> dintre Mystery Boxes noastre au o valoare mai mare a produselor din interiorul lor decât prețul plătit!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+
+      <!-- Longevity Mystery Box -->
+      <section class="reveal mt-12 mb-16">
+        <div class="border-gold rounded-2xl p-8 bg-purple-gold glow-purple">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-heart-pulse text-gold4"></i> Longevity Mystery Box</h2>
+          <p class="text-zinc-200 mb-4">Produse de longevitate și sănătate în format Mystery Box. <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul!</p>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-gold4">$100</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-gold4">$500</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-gold4">$1,000</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-gold4">$5,000</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="text-2xl font-bold text-gold4">$10,000</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+          </div>
+          <p class="text-sm text-zinc-300 mb-2"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <p class="text-sm text-zinc-300 mb-2">Fiecare are preț de pornire și mai multe tieruri. Caracteristici suplimentare se bifează și generează costuri extra.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-certificate text-gold4 mr-2"></i>Certificat care atesta valoarea de piata mai mare decat pretul platit (pentru tierurile $1,000+)</p>
+          <button class="open-interest btn-gold px-4 py-2 rounded-md text-sm font-semibold" data-title="Longevity Mystery Box">Activează</button>
+        </div>
+      </section>
+
+      <!-- Seturi LEGO -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-cube text-gold4"></i> Seturi LEGO</h2>
+          <p class="text-zinc-300 mb-4">Always-Profit-Mystery Box: <strong class="text-gold4">GARANTAT</strong> valoarea de piață este peste costul Mystery Boxului! <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul. Poți primi inclusiv seturi retrase din producție.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-4">
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$15</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$30</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$40</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$50</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$70</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$100</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$150</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$200</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$300</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$400</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$700</div><div class="text-xs text-zinc-300">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-3 text-center"><div class="font-bold text-gold4">$1,000</div><div class="text-xs text-zinc-300">/lună</div></div>
+          </div>
+          <p class="text-sm text-zinc-300 mb-2"><i class="fa-solid fa-gift text-gold4 mr-2"></i>+$5/lună ambalare cadou | Ales dintre mai multe teme (unele au costuri suplimentare)</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-certificate text-gold4 mr-2"></i>Invitatie la Fondul de Investitii in Seturi LEGO (unic in lume) + certificat care atesta valoarea de piata mai mare decat pretul platit</p>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold" data-title="Seturi LEGO">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Funko Pops -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8 bg-purple-gold glow-purple">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-user-astronaut text-gold4"></i> Funko Pops</h2>
+          <p class="text-zinc-300 mb-4">Numărul de figurine este pe lună. Șanse la Funko Pops RARE și Ediții Speciale la toate tierurile! <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$30/lună</div><div class="text-sm text-zinc-300">1-3 Funko Pops</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$50/lună</div><div class="text-sm text-zinc-300">1-5 Funko Pops</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$100/lună</div><div class="text-sm text-zinc-300">2-10 Funko Pops</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$250/lună</div><div class="text-sm text-zinc-300">4-25 Funko Pops</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$500/lună</div><div class="text-sm text-zinc-300">5-50 Funko Pops</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$1,000/lună</div><div class="text-sm text-zinc-300">10-100 Funko Pops<br/><span class="text-gold4">GARANTAT una RARA</span></div></div>
+          </div>
+          <p class="text-sm text-zinc-300 mt-4 mb-2"><i class="fa-solid fa-gift text-gold4 mr-2"></i>+$5/lună impachetare cadou | Pliant cu Fondul de Investitii in Collectibles</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-certificate text-gold4 mr-2"></i>Certificat care atesta valoarea de piata mai mare decat pretul platit (pentru tierurile $500+)</p>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold mt-4" data-title="Funko Pops">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Action Figures -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-robot text-gold4"></i> Action Figures</h2>
+          <p class="text-zinc-300 mb-4">Număr figurine pe lună. Șanse la figurine RARE la toate tierurile! Pot pica și <strong class="text-gold4">Funko Pops</strong>. <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$30/lună</div><div class="text-sm text-zinc-300">1-2 figurine</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$100/lună</div><div class="text-sm text-zinc-300">2-5 figurine</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$300/lună</div><div class="text-sm text-zinc-300">3-10 figurine</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$500/lună</div><div class="text-sm text-zinc-300">5-20 figurine</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$1,000/lună</div><div class="text-sm text-zinc-300">10-30 figurine<br/><span class="text-gold4">GARANTAT una RARA</span></div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$3,000/lună</div><div class="text-sm text-zinc-300">20-100 figurine<br/><span class="text-gold4">GARANTAT 2 RARE</span></div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$5,000/lună</div><div class="text-sm text-zinc-300">30-200 figurine<br/><span class="text-gold4">GARANTAT 3 RARE</span></div></div>
+          </div>
+          <p class="text-sm text-zinc-300 mt-4 mb-4"><i class="fa-solid fa-certificate text-gold4 mr-2"></i>Certificat care atesta valoarea de piata mai mare decat pretul platit (pentru tierurile $1,000+)</p>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold mt-4" data-title="Action Figures">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Statuete și Figurine Premium -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8 bg-purple-gold glow-purple">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-crown text-gold4"></i> Statuete și Figurine Premium</h2>
+          <p class="text-zinc-300 mb-4">Pot pica și <strong class="text-gold4">Funko Pops</strong>. <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$1,000/lună</div><div class="text-sm text-zinc-300">1-3 Statuete/Figurine</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$2,500/lună</div><div class="text-sm text-zinc-300">2-5 Statuete/Figurine</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$5,000/lună</div><div class="text-sm text-zinc-300">3-10 Statuete/Figurine</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$10,000/lună</div><div class="text-sm text-zinc-300">4-20 Statuete/Figurine<br/><span class="text-gold4">GARANTAT o Statueta</span></div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$20,000/lună</div><div class="text-sm text-zinc-300">10-30 Statuete/Figurine<br/><span class="text-gold4">GARANTAT 2 Statuete</span></div></div>
+          </div>
+          <p class="text-sm text-zinc-300 mt-4 mb-2"><i class="fa-solid fa-gift text-gold4 mr-2"></i>Ambalare cadou: +$10/lună | Ambalare protecție: +$50/lună</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-certificate text-gold4 mr-2"></i>Certificat care atesta valoarea de piata mai mare decat pretul platit + invitatie la Fondul de Investitii in Collectibles Premium</p>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold mt-4" data-title="Statuete și Figurine Premium">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Minifigurine -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8">
+          <h2 class="text-3xl font-bold mb-4 flex items-center gap-3"><i class="fa-solid fa-user-ninja text-gold4"></i> Minifigurine</h2>
+          <p class="text-zinc-300 mb-4">Pot pica și <strong class="text-gold4">Funko Pops mici</strong>. <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="border-gold rounded-xl p-6">
+              <h3 class="text-xl font-semibold mb-3 text-gold4">Custom de Buget</h3>
+              <div class="space-y-2 text-sm">
+                <div>$10/lună - 1-2 minifigurine</div>
+                <div>$20/lună - 2-5 minifigurine</div>
+                <div>$50/lună - 3-10 minifigurine</div>
+                <div>$100/lună - 10-20 minifigurine</div>
+                <div>$200/lună - 20-50 minifigurine + <span class="text-gold4">1 RARA</span></div>
+              </div>
+            </div>
+            <div class="border-gold rounded-xl p-6">
+              <h3 class="text-xl font-semibold mb-3 text-gold4">Originale</h3>
+              <div class="space-y-2 text-sm">
+                <div>$20/lună - 1-5 minifigurine</div>
+                <div>$50/lună - 2-7 minifigurine</div>
+                <div>$100/lună - 3-10 minifigurine</div>
+                <div>$200/lună - 5-15 minifigurine</div>
+                <div>$300/lună - 10-25 minifigurine</div>
+                <div>$400/lună - 15-50 minifigurine</div>
+                <div>$500/lună - 20-100 minifigurine + <span class="text-gold4">1 RARA</span></div>
+              </div>
+              <p class="text-xs text-zinc-400 mt-3">+$25 impachetare Premium</p>
+            </div>
+            <div class="border-gold rounded-xl p-6">
+              <h3 class="text-xl font-semibold mb-3 text-gold4">Custom Premium</h3>
+              <div class="space-y-2 text-sm">
+                <div>$50/lună - 1-3 minifigurine</div>
+                <div>$100/lună - 2-5 minifigurine</div>
+                <div>$200/lună - 3-7 minifigurine</div>
+                <div>$300/lună - 5-10 minifigurine</div>
+                <div>$500/lună - 7-15 minifigurine</div>
+                <div>$750/lună - 10-20 minifigurine</div>
+                <div>$1,000/lună - 20-50 minifigurine + <span class="text-gold4">1 RARA</span></div>
+              </div>
+              <p class="text-xs text-zinc-400 mt-3">+$25 impachetare Premium</p>
+            </div>
+          </div>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold mt-6" data-title="Minifigurine">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Figurine Create de Noi -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8 bg-purple-gold glow-purple">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-palette text-gold4"></i> Figurine Create de Noi</h2>
+          <p class="text-zinc-300 mb-4">$500/lună - cel puțin 10 figurine create de noi. Abonamente Custom disponibile.</p>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold" data-title="Figurine Create de Noi">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Magic: The Gathering -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8">
+          <h2 class="text-3xl font-bold mb-4 flex items-center gap-3"><i class="fa-solid fa-wand-magic-sparkles text-gold4"></i> Magic: The Gathering</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="border-gold rounded-xl p-6">
+              <h3 class="text-xl font-semibold mb-3">Boosters</h3>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mb-3">
+                <div>1 booster - $5</div>
+                <div>2 boosters - $10</div>
+                <div>4 boosters - $20</div>
+                <div>8 boosters - $40</div>
+                <div>12 boosters - $60</div>
+                <div>16 boosters - $80</div>
+                <div>24 boosters - $180</div>
+                <div>36 boosters - $360</div>
+                <div>72 boosters - $720</div>
+                <div>144 boosters - $1,440</div>
+                <div>288 boosters - $2,880</div>
+              </div>
+              <p class="text-xs text-zinc-400">+$1/booster dacă vrei să îți alegi setul</p>
+            </div>
+            <div class="border-gold rounded-xl p-6">
+              <h3 class="text-xl font-semibold mb-3">Decks</h3>
+              <div class="space-y-3 text-sm">
+                <div><strong class="text-gold4">Standard Ready Decks:</strong><br/>$150/lună</div>
+                <div><strong class="text-gold4">Modern Decks:</strong><br/>$500/lună</div>
+                <div><strong class="text-gold4">Competitive Commander Decks (Bracket 3):</strong><br/>$100/lună</div>
+                <div class="mt-4"><strong class="text-gold4">Pachete de 60 de cărți:</strong><br/>$20/lună un deck<br/>+$10/lună îți poți alege setul majoritar</div>
+                <div class="mt-4"><strong class="text-gold4">Pachete Commander:</strong><br/>$100/lună un deck<br/>+$50/lună dacă vrei să îți alegi Commanderul</div>
+                <div class="mt-4 text-zinc-400 text-xs">Alte tieruri disponibile - contactează-ne pentru detalii</div>
+              </div>
+            </div>
+          </div>
+          <p class="text-sm text-zinc-300 mt-4">Mystery box de Card games și board games: Fully Custom</p>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold mt-4" data-title="Magic: The Gathering">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Cafea -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8 bg-purple-gold glow-purple">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-mug-hot text-gold4"></i> Abonamente la Cafea</h2>
+          <p class="text-zinc-300 mb-4 text-sm">Valabil în prima fază în România</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$30/lună</div><div class="text-sm text-zinc-300">Îți poți lua o cafea pe zi din rețeaua noastră</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$60/lună</div><div class="text-sm text-zinc-300">Ți se livrează acasă o cafea pe zi</div></div>
+          </div>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold mt-4" data-title="Abonamente la Cafea">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Mâncare -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-utensils text-gold4"></i> Abonamente la Mâncare</h2>
+          <p class="text-zinc-300 mb-4 text-sm">Valabil în prima fază în România</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$20/zi</div><div class="text-sm text-zinc-300">Meniu 1500 kcal</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$30/zi</div><div class="text-sm text-zinc-300">Meniu 2000 kcal</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$50/zi</div><div class="text-sm text-zinc-300">Meniu 2500 kcal</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4"><div class="font-bold text-gold4 text-xl mb-1">$100/zi</div><div class="text-sm text-zinc-300">Meniu cu ingrediente Premium</div></div>
+          </div>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold mt-4" data-title="Abonamente la Mâncare">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Carcase de Controllere -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8 bg-purple-gold glow-purple">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-gamepad text-gold4"></i> Abonamente la Carcase de Controllere</h2>
+          <p class="text-zinc-300 mb-4">$15/lună pentru o carcasă pe lună. Abonamente custom disponibile.</p>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold" data-title="Carcase de Controllere">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Îngrijire Orală -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-tooth text-gold4"></i> Îngrijire Orală</h2>
+          <p class="text-zinc-300 mb-4">Produse premium pentru sănătatea orală. <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$50</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$100</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$200</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$500</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+          </div>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold" data-title="Îngrijire Orală">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- YouTooz -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8 bg-purple-gold glow-purple">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-box text-gold4"></i> YouTooz</h2>
+          <p class="text-zinc-300 mb-4">Colecții exclusive YouTooz. <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$75</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$150</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$300</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+          </div>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold" data-title="YouTooz">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Geek Subscription -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-glasses text-gold4"></i> Geek Subscription</h2>
+          <p class="text-zinc-300 mb-4">Colectie de orice de pe site legat de geeks: LEGO, Funko, Action Figures, Magic, YouTooz și multe altele! <strong class="text-gold4">Peste 90%</strong> dintre cutiile noastre au valoare mai mare decât prețul.</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$100</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$250</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$500</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$1,000</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+          </div>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold" data-title="Geek Subscription">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- B2B Geek Subscription for Shops -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8 bg-purple-gold glow-purple">
+          <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-store text-gold4"></i> B2B Geek Subscription for Shops</h2>
+          <p class="text-zinc-300 mb-4">Perfect pentru magazine! Poate conține multiple același item, valoare mare de revânzare. Orice de pe site legat de geeks: LEGO, Funko, Action Figures, Magic, YouTooz și multe altele!</p>
+          <p class="text-sm text-zinc-300 mb-4"><i class="fa-solid fa-eye text-gold4 mr-2"></i>Opțiune: Poți alege să vezi conținutul înainte de comandă (nu Mystery)</p>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$500</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$1,000</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$2,500</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+            <div class="tier-card bg-black/60 rounded-lg p-4 text-center"><div class="font-bold text-gold4 text-xl">$5,000</div><div class="text-xs text-zinc-300 mt-1">/lună</div></div>
+          </div>
+          <button class="open-interest btn-gold px-6 py-3 rounded-md font-semibold" data-title="B2B Geek Subscription for Shops">Activează abonament</button>
+        </div>
+      </section>
+
+      <!-- Afiliați Platformă - Deal-uri și Produse -->
+      <section class="reveal mb-16">
+        <div class="border-gold rounded-2xl p-8">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-3xl font-bold mb-2 flex items-center gap-3"><i class="fa-solid fa-handshake text-gold4"></i> Deal-uri de la Afiliați</h2>
+              <p class="text-zinc-300">Produse și oferte exclusive de la partenerii noștri validați</p>
+            </div>
+            <button class="btn-gold px-4 py-2 rounded-md text-sm font-semibold hidden md:inline-flex items-center gap-2">
+              <i class="fa-solid fa-filter"></i> Filtrează
+            </button>
+          </div>
+
+          <!-- Filtre rapide -->
+          <div class="mb-6 flex flex-wrap gap-2">
+            <button class="filter-btn px-3 py-1 rounded-full border-gold text-sm hover:shadow-gold-glow transition active" data-filter="all">Toate</button>
+            <button class="filter-btn px-3 py-1 rounded-full border-gold text-sm hover:shadow-gold-glow transition" data-filter="tech">Tech</button>
+            <button class="filter-btn px-3 py-1 rounded-full border-gold text-sm hover:shadow-gold-glow transition" data-filter="gaming">Gaming</button>
+            <button class="filter-btn px-3 py-1 rounded-full border-gold text-sm hover:shadow-gold-glow transition" data-filter="collectibles">Collectibles</button>
+            <button class="filter-btn px-3 py-1 rounded-full border-gold text-sm hover:shadow-gold-glow transition" data-filter="lifestyle">Lifestyle</button>
+          </div>
+
+          <!-- Grid de deal-uri -->
+          <div id="affiliateDeals" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Placeholder cards - vor fi înlocuite cu datele reale -->
+            <div class="affiliate-card border-gold rounded-xl p-6 hover:shadow-gold-glow transition" data-category="tech">
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 rounded-full bg-gold-gradient flex items-center justify-center text-black font-bold">A1</div>
+                  <div>
+                    <h3 class="font-semibold">Nume Afiliat</h3>
+                    <p class="text-xs text-zinc-400">Categorie</p>
+                  </div>
+                </div>
+                <span class="px-2 py-1 bg-gold4/20 text-gold4 text-xs rounded">-20%</span>
+              </div>
+              <div class="mb-3">
+                <h4 class="font-semibold mb-1">Nume Produs / Deal</h4>
+                <p class="text-sm text-zinc-300 line-clamp-2">Descriere scurtă a produsului sau deal-ului oferit de afiliat...</p>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-gold4 font-bold">$99</span>
+                  <span class="text-zinc-500 text-sm line-through ml-2">$124</span>
+                </div>
+                <a href="#" class="btn-gold px-4 py-2 rounded-md text-sm font-semibold">Vezi Deal</a>
+              </div>
+            </div>
+
+            <div class="affiliate-card border-gold rounded-xl p-6 hover:shadow-gold-glow transition" data-category="gaming">
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 rounded-full bg-gold-gradient flex items-center justify-center text-black font-bold">A2</div>
+                  <div>
+                    <h3 class="font-semibold">Nume Afiliat</h3>
+                    <p class="text-xs text-zinc-400">Categorie</p>
+                  </div>
+                </div>
+                <span class="px-2 py-1 bg-gold4/20 text-gold4 text-xs rounded">-15%</span>
+              </div>
+              <div class="mb-3">
+                <h4 class="font-semibold mb-1">Nume Produs / Deal</h4>
+                <p class="text-sm text-zinc-300 line-clamp-2">Descriere scurtă a produsului sau deal-ului oferit de afiliat...</p>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-gold4 font-bold">$149</span>
+                  <span class="text-zinc-500 text-sm line-through ml-2">$175</span>
+                </div>
+                <a href="#" class="btn-gold px-4 py-2 rounded-md text-sm font-semibold">Vezi Deal</a>
+              </div>
+            </div>
+
+            <div class="affiliate-card border-gold rounded-xl p-6 hover:shadow-gold-glow transition" data-category="collectibles">
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-10 h-10 rounded-full bg-gold-gradient flex items-center justify-center text-black font-bold">A3</div>
+                  <div>
+                    <h3 class="font-semibold">Nume Afiliat</h3>
+                    <p class="text-xs text-zinc-400">Categorie</p>
+                  </div>
+                </div>
+                <span class="px-2 py-1 bg-gold4/20 text-gold4 text-xs rounded">-30%</span>
+              </div>
+              <div class="mb-3">
+                <h4 class="font-semibold mb-1">Nume Produs / Deal</h4>
+                <p class="text-sm text-zinc-300 line-clamp-2">Descriere scurtă a produsului sau deal-ului oferit de afiliat...</p>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-gold4 font-bold">$79</span>
+                  <span class="text-zinc-500 text-sm line-through ml-2">$113</span>
+                </div>
+                <a href="#" class="btn-gold px-4 py-2 rounded-md text-sm font-semibold">Vezi Deal</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mesaj pentru când lista va fi adăugată -->
+          <div class="mt-8 text-center border-gold rounded-xl p-6 bg-black/40">
+            <p class="text-zinc-300 text-sm"><i class="fa-solid fa-info-circle text-gold4 mr-2"></i>Lista completă de afiliați și deal-uri va fi adăugată aici. Structura este pregătită și gata de populare.</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="reveal mt-12 border-gold rounded-xl p-8 bg-black/40">
+        <h3 class="text-2xl font-semibold mb-4 text-center">💡 Notă Importantă</h3>
+        <div class="max-w-3xl mx-auto space-y-3 text-sm text-zinc-300">
+          <p>• La produsele fizice se adaugă transportul, calculat în funcție de distanță, metodă selectată și altele.</p>
+          <p>• Fiecare abonament are preț de pornire și mai multe tieruri. Caracteristici suplimentare se bifează și generează costuri extra.</p>
+          <p>• Alege dintre mai multe teme - unele generează costuri suplimentare.</p>
+          <p>• <strong class="text-gold4">Abonamente Custom disponibile pentru toate categoriile!</strong></p>
+          <p>• <strong class="text-gold4">Poți adăuga și modifica ușor abonamentele</strong> direct din contul tău.</p>
+          <p>• <strong class="text-gold4">Opțiunea de a vedea conținutul</strong> (nu Mystery) este disponibilă pentru toate categoriile de Mystery Boxes.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-black border-t border-yellow-600/20 py-10">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 text-zinc-300">
+      <div><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gold-gradient"></div><span class="text-lg font-semibold tracking-widest bg-gold-gradient bg-clip-text text-transparent">GETASUBSCRIPTION</span></div><p class="mt-3 text-sm">Luxury business platform.</p></div>
+      <div><h4 class="font-semibold text-white">Navigație</h4><ul class="mt-3 space-y-2 text-sm"><li><a href="b2b.html" class="hover:text-gold4">B2B</a></li><li><a href="b2c.html" class="hover:text-gold4">B2C</a></li><li><a href="cat1.html" class="hover:text-gold4">Businessuri</a></li></ul></div>
+      <div><h4 class="font-semibold text-white">Resurse</h4><ul class="mt-3 space-y-2 text-sm"><li><a href="cat2.html" class="hover:text-gold4">Servicii</a></li><li><a href="cat3.html" class="hover:text-gold4">Investitori</a></li><li><a href="calls.html" class="hover:text-gold4">Call-uri</a></li></ul></div>
+      <div><h4 class="font-semibold text-white">Contact</h4><div class="mt-3"><a href="https://wa.me/40725669210" target="_blank" class="text-gold4 hover:underline"><i class="fa-brands fa-whatsapp mr-2"></i>0725669210</a></div></div>
+    </div>
+    <div class="mt-8 text-center text-xs text-zinc-500">© <span id="year"></span> GetASubscription. Toate drepturile rezervate.</div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 z-[70] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md" id="loginOverlay"></div>
+    <div class="relative z-10 w-[95%] max-w-md bg-black border-gold rounded-2xl shadow-gold-glow p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gold-gradient">Autentificare</h2>
+        <button id="closeLoginModal" class="text-zinc-400 hover:text-gold4 transition"><i class="fa-solid fa-times text-xl"></i></button>
+      </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Email</label>
+          <input type="email" id="loginEmail" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="email@exemplu.com">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Parolă</label>
+          <input type="password" id="loginPassword" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div id="loginError" class="hidden text-red-400 text-sm"></div>
+        <button type="submit" class="w-full btn-gold px-6 py-3 rounded-md font-semibold">Autentifică-te</button>
+        <p class="text-center text-sm text-zinc-400">Nu ai cont? <button type="button" id="switchToRegister" class="text-gold4 hover:underline">Înregistrează-te</button></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="fixed inset-0 z-[70] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md" id="registerOverlay"></div>
+    <div class="relative z-10 w-[95%] max-w-md bg-black border-gold rounded-2xl shadow-gold-glow p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gold-gradient">Înregistrare</h2>
+        <button id="closeRegisterModal" class="text-zinc-400 hover:text-gold4 transition"><i class="fa-solid fa-times text-xl"></i></button>
+      </div>
+      <form id="registerForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Nume complet</label>
+          <input type="text" id="registerName" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="Ion Popescu">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Email</label>
+          <input type="email" id="registerEmail" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="email@exemplu.com">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Parolă</label>
+          <input type="password" id="registerPassword" required minlength="6" class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Confirmă parola</label>
+          <input type="password" id="registerPasswordConfirm" required minlength="6" class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div id="registerError" class="hidden text-red-400 text-sm"></div>
+        <button type="submit" class="w-full btn-gold px-6 py-3 rounded-md font-semibold">Creează cont</button>
+        <p class="text-center text-sm text-zinc-400">Ai deja cont? <button type="button" id="switchToLogin" class="text-gold4 hover:underline">Autentifică-te</button></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Interest Modal - Enhanced with Calculator -->
+  <div id="interestModal" class="fixed inset-0 z-[60] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+    <div class="relative z-10 w-[95%] max-w-3xl max-h-[90vh] bg-black border border-yellow-600/30 rounded-xl shadow-gold-glow overflow-y-auto">
+      <div class="sticky top-0 bg-black/95 backdrop-blur-sm border-b border-yellow-600/20 px-6 py-4 flex items-center justify-between z-10">
+        <h3 id="modalTitle" class="text-xl font-semibold">Activează abonament</h3>
+        <button id="modalClose" class="text-zinc-400 hover:text-gold4 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <div class="p-6">
+        <p class="text-zinc-300 mb-6">Completează formularul pentru a activa abonamentul. Toate costurile sunt calculate automat.</p>
+        <form id="interestForm" class="grid grid-cols-1 gap-4">
+          <!-- Date personale -->
+          <div class="border-gold rounded-lg p-4">
+            <h4 class="font-semibold mb-3 text-gold4"><i class="fa-solid fa-user mr-2"></i>Date personale</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input id="modalName" name="name" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4" placeholder="Nume complet *" required/>
+              <input type="email" id="modalEmail" name="email" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4" placeholder="Email *" required/>
+              <input id="modalPhone" name="phone" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4" placeholder="Telefon *" required/>
+              <input id="modalAddress" name="address" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4" placeholder="Adresă completă *" required/>
+            </div>
+          </div>
+
+          <!-- Selecție Tier -->
+          <div class="border-gold rounded-lg p-4">
+            <h4 class="font-semibold mb-3 text-gold4"><i class="fa-solid fa-layer-group mr-2"></i>Selectează tier</h4>
+            <div id="tierSelection" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <!-- Tier-urile vor fi populate dinamic -->
+            </div>
+            <input type="hidden" id="selectedTier" name="tier" required/>
+          </div>
+
+          <!-- Opțiuni extra -->
+          <div class="border-gold rounded-lg p-4">
+            <h4 class="font-semibold mb-3 text-gold4"><i class="fa-solid fa-sliders-h mr-2"></i>Opțiuni extra</h4>
+            
+            <!-- Teme -->
+            <div class="mb-4">
+              <label class="block text-sm text-zinc-300 mb-2">Temă (unele au costuri suplimentare)</label>
+              <select id="modalTheme" name="theme" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4">
+                <option value="none">Fără temă specifică</option>
+                <option value="marvel">Marvel (+$10/lună)</option>
+                <option value="dc">DC Comics (+$10/lună)</option>
+                <option value="starwars">Star Wars (+$15/lună)</option>
+                <option value="harrypotter">Harry Potter (+$12/lună)</option>
+                <option value="anime">Anime (+$8/lună)</option>
+                <option value="gaming">Gaming (+$10/lună)</option>
+              </select>
+            </div>
+
+            <!-- Ambalare -->
+            <div class="mb-4">
+              <label class="block text-sm text-zinc-300 mb-2">Ambalare</label>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <label class="border-gold rounded-lg p-3 cursor-pointer hover:shadow-gold-glow transition text-center packaging-option">
+                  <input type="radio" name="packaging" value="none" class="hidden" checked>
+                  <div class="text-xs font-semibold">Standard</div>
+                  <div class="text-xs text-zinc-400">$0</div>
+                </label>
+                <label class="border-gold rounded-lg p-3 cursor-pointer hover:shadow-gold-glow transition text-center packaging-option">
+                  <input type="radio" name="packaging" value="gift" class="hidden">
+                  <div class="text-xs font-semibold">Cadou</div>
+                  <div class="text-xs text-zinc-400">+$5/lună</div>
+                </label>
+                <label class="border-gold rounded-lg p-3 cursor-pointer hover:shadow-gold-glow transition text-center packaging-option">
+                  <input type="radio" name="packaging" value="protection" class="hidden">
+                  <div class="text-xs font-semibold">Protecție</div>
+                  <div class="text-xs text-zinc-400">+$50/lună</div>
+                </label>
+                <label class="border-gold rounded-lg p-3 cursor-pointer hover:shadow-gold-glow transition text-center packaging-option">
+                  <input type="radio" name="packaging" value="premium" class="hidden">
+                  <div class="text-xs font-semibold">Premium</div>
+                  <div class="text-xs text-zinc-400">+$25/lună</div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Vezi conținut (non-mystery) -->
+            <div class="mb-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="seeContents" name="seeContents" class="w-4 h-4 border-gold bg-black/60 rounded">
+                <span class="text-sm text-zinc-300">Vreau să văd conținutul înainte de comandă (nu Mystery Box)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Transport -->
+          <div class="border-gold rounded-lg p-4">
+            <h4 class="font-semibold mb-3 text-gold4"><i class="fa-solid fa-truck mr-2"></i>Transport</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              <div>
+                <label class="block text-sm text-zinc-300 mb-2">Distanță (km)</label>
+                <input type="number" id="shippingDistance" name="distance" min="0" value="0" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4" placeholder="0">
+              </div>
+              <div>
+                <label class="block text-sm text-zinc-300 mb-2">Metodă de livrare</label>
+                <select id="shippingMethod" name="shippingMethod" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4">
+                  <option value="standard">Standard</option>
+                  <option value="express">Express (+50%)</option>
+                  <option value="premium">Premium (+100%)</option>
+                  <option value="international">Internațional (+200%)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-zinc-300 mb-2">Țară</label>
+              <select id="shippingCountry" name="country" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4">
+                <option value="RO">România</option>
+                <option value="EU">Uniunea Europeană</option>
+                <option value="OTHER">Alte țări</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Calcul total -->
+          <div class="border-gold rounded-lg p-4 bg-gold-gradient/10">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-zinc-300">Preț de bază:</span>
+              <span id="calcBasePrice" class="font-semibold">$0</span>
+            </div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-zinc-300">Temă:</span>
+              <span id="calcTheme" class="font-semibold">$0</span>
+            </div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-zinc-300">Ambalare:</span>
+              <span id="calcPackaging" class="font-semibold">$0</span>
+            </div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-zinc-300">Transport:</span>
+              <span id="calcShipping" class="font-semibold">$0</span>
+            </div>
+            <div class="border-t border-yellow-600/30 pt-2 mt-2 flex items-center justify-between">
+              <span class="text-lg font-semibold text-gold4">Total/lună:</span>
+              <span id="calcTotal" class="text-2xl font-bold text-gold4">$0</span>
+            </div>
+          </div>
+
+          <!-- Mesaj opțional -->
+          <div>
+            <label class="block text-sm text-zinc-300 mb-2">Mesaj sau întrebări (opțional)</label>
+            <textarea id="modalMessage" name="message" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4" rows="3" placeholder="Mesaj sau întrebări"></textarea>
+          </div>
+
+          <div id="modalError" class="text-red-400 text-sm hidden"></div>
+          <div id="modalSuccess" class="text-gold4 text-sm hidden"><i class="fa-solid fa-check-circle mr-2"></i>Cerere trimisă! Te vom contacta în cel mult 24 de ore pentru activare.</div>
+          <button type="submit" class="btn-gold px-6 py-3 rounded-md font-semibold text-lg">Activează abonament</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const root=document.documentElement;
+    const themeToggle=document.getElementById('themeToggle');
+    const storedTheme=localStorage.getItem('themePreference');
+    if(storedTheme==='light'){root.classList.add('light-mode');}
+    updateThemeAria();
+    if(themeToggle){themeToggle.addEventListener('click',()=>{root.classList.toggle('light-mode');const isLight=root.classList.contains('light-mode');localStorage.setItem('themePreference',isLight?'light':'dark');updateThemeAria();});}
+    function updateThemeAria(){if(!themeToggle)return;const isLight=root.classList.contains('light-mode');themeToggle.setAttribute('aria-label',isLight?'Comută modul întunecat':'Comută modul luminos');}
+
+    document.getElementById('year').textContent=new Date().getFullYear();
+    const menuBtn=document.getElementById('menuBtn');const mobileMenu=document.getElementById('mobileMenu');if(menuBtn){menuBtn.addEventListener('click',()=>mobileMenu.classList.toggle('hidden'));}
+    const observer=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}})},{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+    // Interest Modal - Enhanced
+    const modal=document.getElementById('interestModal');
+    function closeModal(){modal.classList.add('hidden');modal.classList.remove('flex');}
+    document.getElementById('interestForm').addEventListener('submit',function(e){e.preventDefault();const name=document.getElementById('modalName').value.trim();const email=document.getElementById('modalEmail').value.trim();const phone=document.getElementById('modalPhone').value.trim();const address=document.getElementById('modalAddress').value.trim();const tier=document.getElementById('selectedTier').value;const errorEl=document.getElementById('modalError');const successEl=document.getElementById('modalSuccess');errorEl.classList.add('hidden');successEl.classList.add('hidden');if(!name||!email||!phone||!address||!tier){errorEl.textContent='Te rugăm să completezi toate câmpurile obligatorii.';errorEl.classList.remove('hidden');return;}const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;if(!emailRegex.test(email)){errorEl.textContent='Te rugăm să introduci o adresă de email validă.';errorEl.classList.remove('hidden');return;}const formData={name,email,phone,address,tier,theme:document.getElementById('modalTheme').value,packaging:document.querySelector('input[name="packaging"]:checked')?.value,seeContents:document.getElementById('seeContents').checked,shipping:{distance:document.getElementById('shippingDistance').value,method:document.getElementById('shippingMethod').value,country:document.getElementById('shippingCountry').value},message:document.getElementById('modalMessage').value,total:document.getElementById('calcTotal').textContent};console.log('Form data:',formData);localStorage.setItem('lastSubscription',JSON.stringify(formData));if(window.AffiliateTracking){window.AffiliateTracking.trackSubscription(formData);}successEl.classList.remove('hidden');setTimeout(()=>{closeModal();window.location.href='checkout.html';},2000);});
+    document.addEventListener('click',e=>{if(e.target.id==='modalClose'||e.target.closest('#modalClose'))closeModal();if(e.target===modal?.firstElementChild)closeModal();});
+    // Affiliate Deals Filter
+    const filterBtns=document.querySelectorAll('.filter-btn');const affiliateCards=document.querySelectorAll('.affiliate-card');filterBtns.forEach(btn=>{btn.addEventListener('click',()=>{const filter=btn.getAttribute('data-filter');filterBtns.forEach(b=>b.classList.remove('active','bg-gold-gradient','text-black'));btn.classList.add('active','bg-gold-gradient','text-black');if(filter==='all'){affiliateCards.forEach(card=>card.style.display='block');}else{affiliateCards.forEach(card=>{card.style.display=card.getAttribute('data-category')===filter?'block':'none';});}});});
+    // Authentication System
+    const accountBtn=document.getElementById('accountBtn');const accountDropdown=document.getElementById('accountDropdown');const accountMenuLoggedOut=document.getElementById('accountMenuLoggedOut');const accountMenuLoggedIn=document.getElementById('accountMenuLoggedIn');const loginModal=document.getElementById('loginModal');const registerModal=document.getElementById('registerModal');const loginForm=document.getElementById('loginForm');const registerForm=document.getElementById('registerForm');const logoutBtn=document.getElementById('logoutBtn');
+    function checkAuth(){const user=localStorage.getItem('currentUser');if(user){const userData=JSON.parse(user);accountMenuLoggedOut.classList.add('hidden');accountMenuLoggedIn.classList.remove('hidden');document.getElementById('userNameDisplay').textContent=userData.name;document.getElementById('userEmailDisplay').textContent=userData.email;}else{accountMenuLoggedOut.classList.remove('hidden');accountMenuLoggedIn.classList.add('hidden');}}
+    function closeDropdown(){accountDropdown.classList.add('hidden');}
+    accountBtn.addEventListener('click',(e)=>{e.stopPropagation();accountDropdown.classList.toggle('hidden');});
+    document.addEventListener('click',(e)=>{if(!e.target.closest('#accountDropdownContainer'))closeDropdown();});
+    function openLoginModal(){registerModal.classList.add('hidden');loginModal.classList.remove('hidden');loginModal.classList.add('flex');document.getElementById('loginError').classList.add('hidden');}
+    function closeLoginModal(){loginModal.classList.add('hidden');loginModal.classList.remove('flex');}
+    function openRegisterModal(){loginModal.classList.add('hidden');registerModal.classList.remove('hidden');registerModal.classList.add('flex');document.getElementById('registerError').classList.add('hidden');}
+    function closeRegisterModal(){registerModal.classList.add('hidden');registerModal.classList.remove('flex');}
+    document.getElementById('openLoginBtn').addEventListener('click',()=>{closeDropdown();openLoginModal();});
+    document.getElementById('openRegisterBtn').addEventListener('click',()=>{closeDropdown();openRegisterModal();});
+    document.getElementById('closeLoginModal').addEventListener('click',closeLoginModal);
+    document.getElementById('closeRegisterModal').addEventListener('click',closeRegisterModal);
+    document.getElementById('loginOverlay').addEventListener('click',closeLoginModal);
+    document.getElementById('registerOverlay').addEventListener('click',closeRegisterModal);
+    document.getElementById('switchToRegister').addEventListener('click',openRegisterModal);
+    document.getElementById('switchToLogin').addEventListener('click',openLoginModal);
+    loginForm.addEventListener('submit',(e)=>{e.preventDefault();const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const errorEl=document.getElementById('loginError');const users=JSON.parse(localStorage.getItem('users')||'[]');const user=users.find(u=>u.email===email&&u.password===password);if(user){localStorage.setItem('currentUser',JSON.stringify({name:user.name,email:user.email}));checkAuth();closeLoginModal();loginForm.reset();}else{errorEl.textContent='Email sau parolă incorectă.';errorEl.classList.remove('hidden');}});
+    registerForm.addEventListener('submit',(e)=>{e.preventDefault();const name=document.getElementById('registerName').value.trim();const email=document.getElementById('registerEmail').value.trim();const password=document.getElementById('registerPassword').value;const passwordConfirm=document.getElementById('registerPasswordConfirm').value;const errorEl=document.getElementById('registerError');if(password!==passwordConfirm){errorEl.textContent='Parolele nu coincid.';errorEl.classList.remove('hidden');return;}if(password.length<6){errorEl.textContent='Parola trebuie să aibă cel puțin 6 caractere.';errorEl.classList.remove('hidden');return;}const users=JSON.parse(localStorage.getItem('users')||'[]');if(users.find(u=>u.email===email)){errorEl.textContent='Acest email este deja înregistrat.';errorEl.classList.remove('hidden');return;}users.push({name,email,password});localStorage.setItem('users',JSON.stringify(users));localStorage.setItem('currentUser',JSON.stringify({name,email}));checkAuth();closeRegisterModal();registerForm.reset();});
+    logoutBtn.addEventListener('click',()=>{localStorage.removeItem('currentUser');checkAuth();closeDropdown();});
+    checkAuth();
+  </script>
+</body>
+</html>
+

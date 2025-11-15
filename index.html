@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GetASubscription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold1: '#a67c00', gold2: '#bf9b30', gold3: '#ffbf00', gold4: '#ffcf40', gold5: '#ffdc73'
+          },
+          boxShadow: {
+            'gold-glow': '0 0 20px rgba(191,155,48,0.45), inset 0 0 12px rgba(255,207,64,0.35)'
+          },
+          backgroundImage: {
+            'gold-gradient': 'linear-gradient(135deg,#a67c00 0%,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73 100%)'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root { color-scheme: dark; }
+    .light-mode { color-scheme: light; }
+    body { background:#000; color:#e7e7e7; font-family:'Montserrat','Poppins',system-ui; transition:background .3s ease, color .3s ease }
+    .btn-gold { background-image:linear-gradient(135deg,#a67c00,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73); color:#111; box-shadow:0 0 0 1px rgba(255,207,64,.35) inset,0 8px 24px rgba(255,191,0,.25); transition:transform .2s, box-shadow .2s }
+    .btn-gold:hover { transform:translateY(-2px); box-shadow:0 0 0 1px rgba(255,220,115,.55) inset,0 12px 32px rgba(255,207,64,.35) }
+    .border-gold { border:1px solid rgba(191,155,48,.35); box-shadow:inset 0 0 12px rgba(191,155,48,.15),0 0 24px rgba(191,155,48,.12) }
+    .text-gold-gradient { background:linear-gradient(135deg,#a67c00,#ffbf00,#ffdc73); -webkit-background-clip:text; background-clip:text; color:transparent }
+
+    .hero-section { position:relative; overflow:hidden; transition:background .3s ease; }
+    .hero-gradient { position:absolute; inset:-40% -20%; background:radial-gradient(circle at 30% 20%,rgba(191,155,48,.25),transparent 55%), radial-gradient(circle at 70% 30%,rgba(111,66,193,.25),transparent 55%); animation: gradientShift 18s ease-in-out infinite alternate; pointer-events:none; transition:background .3s ease }
+    .hero-orb { position:absolute; border-radius:9999px; filter:blur(40px); opacity:.65; animation: orbFloat 22s ease-in-out infinite; pointer-events:none; }
+    .hero-orb:nth-child(1) { width:240px; height:240px; top:-120px; left:10%; background:rgba(191,155,48,.35); animation-delay:-4s; }
+    .hero-orb:nth-child(2) { width:180px; height:180px; bottom:-60px; right:15%; background:rgba(106,13,173,.35); animation-delay:-9s; }
+    .hero-orb:nth-child(3) { width:140px; height:140px; top:20%; right:30%; background:rgba(255,207,64,.25); animation-delay:-14s; }
+
+    .hero-particle { position:absolute; width:6px; height:6px; border-radius:9999px; background:rgba(255,207,64,.85); opacity:0; animation: particleRise 12s infinite ease-in; pointer-events:none; }
+    .hero-particle:nth-child(4) { left:12%; bottom:10%; animation-delay:0s; }
+    .hero-particle:nth-child(5) { left:45%; bottom:15%; animation-delay:-3s; }
+    .hero-particle:nth-child(6) { right:18%; bottom:12%; animation-delay:-6s; }
+
+    .animate-fade { opacity:0; transform:translateY(16px); transition:opacity .7s ease, transform .7s ease; }
+    .animate-fade.visible { opacity:1; transform:translateY(0); }
+    .hero-button { animation: buttonPulse 7s ease-in-out infinite; }
+    .hero-button:nth-of-type(2) { animation-delay:-2s; }
+
+    header { background:rgba(0,0,0,0.4); border-bottom:1px solid rgba(191,155,48,0.2); transition:background .3s ease, border-color .3s ease; }
+    footer { transition:background .3s ease, color .3s ease; }
+    #accountDropdown { animation: slideDown .2s ease-out }
+    @keyframes slideDown { from { opacity:0; transform:translateY(-10px) } to { opacity:1; transform:translateY(0) } }
+    #loginModal,#registerModal { transition:opacity .3s ease }
+    #loginModal.hidden,#registerModal.hidden { opacity:0; pointer-events:none }
+    #loginModal:not(.hidden),#registerModal:not(.hidden) { opacity:1 }
+    #b2bB2cModal { transition: opacity .3s ease }
+    #b2bB2cModal.hidden { opacity:0; pointer-events:none }
+
+    @keyframes gradientShift { to { transform:translate3d(-6%,6%,0) scale(1.08); } }
+    @keyframes orbFloat { 0%,100% { transform:translate3d(0,0,0) } 50% { transform:translate3d(4%,8%,0) } }
+    @keyframes particleRise { 0% { opacity:0; transform:translateY(0) scale(.6) } 10% { opacity:.8 } 60% { opacity:.8 } 100% { opacity:0; transform:translateY(-160px) scale(1.1) } }
+    @keyframes buttonPulse { 0%,100% { transform:translateY(0) scale(1) } 50% { transform:translateY(-4px) scale(1.02) } }
+
+    .theme-toggle { width:36px; height:36px; border-radius:9999px; border:1px solid rgba(191,155,48,.45); background:rgba(255,255,255,0.06); color:#facc15; display:inline-flex; align-items:center; justify-content:center; transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease; }
+    .theme-toggle:hover { transform:translateY(-1px); box-shadow:0 0 12px rgba(191,155,48,.3); }
+    .theme-toggle i { font-size:0.95rem; }
+    .theme-toggle .icon-moon { display:none; }
+
+    .light-mode body { background:#f6f5f0; color:#1f1f1f; }
+    .light-mode header { background:rgba(255,255,255,0.85); border-bottom:1px solid rgba(191,155,48,0.3); }
+    .light-mode footer { background:#faf7ef; border-top:1px solid rgba(191,155,48,0.2); color:#1f1f1f; }
+    .light-mode .border-gold { box-shadow:inset 0 0 12px rgba(191,155,48,.08),0 0 18px rgba(191,155,48,.1); }
+    .light-mode .bg-black { background:#ffffff!important; }
+    .light-mode .bg-black\/40 { background:rgba(255,255,255,0.85)!important; color:#1f1f1f!important; }
+    .light-mode .bg-black\/60 { background:rgba(255,255,255,0.9)!important; color:#1f1f1f!important; }
+    .light-mode .bg-black\/80 { background:rgba(255,255,255,0.94)!important; color:#1f1f1f!important; }
+    .light-mode .bg-black\/90 { background:rgba(255,255,255,0.96)!important; color:#1f1f1f!important; }
+    .light-mode .bg-black\/95 { background:rgba(255,255,255,0.98)!important; color:#1f1f1f!important; }
+    .light-mode .bg-black-satin { background:linear-gradient(135deg,#fafafa 0%,#f3f0ff 50%,#fff5d6 100%); }
+    .light-mode .hero-gradient { background:radial-gradient(circle at 30% 20%,rgba(255,212,150,.35),transparent 55%), radial-gradient(circle at 70% 30%,rgba(175,138,255,.3),transparent 55%); }
+    .light-mode .hero-orb:nth-child(1) { background:rgba(255,214,143,.35); }
+    .light-mode .hero-orb:nth-child(2) { background:rgba(190,160,255,.35); }
+    .light-mode .hero-orb:nth-child(3) { background:rgba(255,205,150,.3); }
+    .light-mode .hero-particle { background:rgba(214,162,37,.75); }
+    .light-mode .text-zinc-300 { color:#394150!important; }
+    .light-mode .text-zinc-400 { color:#4b5563!important; }
+    .light-mode .text-zinc-500 { color:#6b7280!important; }
+    .light-mode .text-white { color:#0f172a!important; }
+    .light-mode [class*="border-yellow-600/20"] { border-color:rgba(191,155,48,0.28)!important; }
+    .light-mode input,
+    .light-mode textarea,
+    .light-mode select { color:#1f1f1f; }
+    .light-mode .theme-toggle { background:rgba(255,255,255,0.95); color:#7c5800; border-color:rgba(191,155,48,.45); }
+    .light-mode .theme-toggle .icon-sun { display:none; }
+    .light-mode .theme-toggle .icon-moon { display:inline-block; }
+  </style>
+  </style>
+</head>
+<body>
+  <header class="fixed top-0 inset-x-0 z-50 backdrop-blur bg-black/40 border-b border-yellow-600/20">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-16 flex items-center justify-between relative">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-gold-gradient"></div>
+        <span class="text-xl font-semibold tracking-widest text-gold-gradient">GetASubscription</span>
+      </a>
+      <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm">
+        <a href="index.html" class="hover:text-gold4 transition text-gold4">Acasă</a>
+        <a href="b2b.html" class="hover:text-gold4 transition">B2B</a>
+        <a href="b2c.html" class="hover:text-gold4 transition">B2C</a>
+        <a href="cat1.html" class="hover:text-gold4 transition">Businessuri</a>
+        <a href="cat2.html" class="hover:text-gold4 transition">Servicii</a>
+        <a href="cat3.html" class="hover:text-gold4 transition">Investitori</a>
+        <a href="calls.html" class="hover:text-gold4 transition">Call-uri</a>
+        <a href="ai.html" class="hover:text-gold4 transition">AI</a>
+        <a href="subscriptions.html" class="hover:text-gold4 transition">Subscriptions</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" type="button" class="theme-toggle" aria-label="Comută modul luminos">
+          <i class="fa-solid fa-sun icon-sun"></i>
+          <i class="fa-solid fa-moon icon-moon"></i>
+        </button>
+        <div class="relative z-50" id="accountDropdownContainer">
+          <button id="accountBtn" class="p-2 border border-yellow-600/30 rounded-full text-gold4 hover:shadow-gold-glow transition relative z-50">
+            <i class="fa-solid fa-user text-lg"></i>
+          </button>
+          <div id="accountDropdown" class="hidden absolute right-0 mt-2 w-56 bg-black border-gold rounded-xl shadow-gold-glow overflow-hidden z-[100]">
+            <div id="accountMenuLoggedOut">
+              <button id="openLoginBtn" class="w-full text-left px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-sign-in-alt text-gold4"></i>
+                <span>Autentificare</span>
+              </button>
+              <button id="openRegisterBtn" class="w-full text-left px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-user-plus text-gold4"></i>
+                <span>Înregistrare</span>
+              </button>
+            </div>
+            <div id="accountMenuLoggedIn" class="hidden">
+              <div class="px-4 py-3 border-b border-yellow-600/20">
+                <p class="text-sm text-zinc-400">Conectat ca</p>
+                <p id="userNameDisplay" class="font-semibold text-gold4"></p>
+                <p id="userEmailDisplay" class="text-xs text-zinc-500"></p>
+              </div>
+              <a href="dashboard.html" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-user-circle text-gold4"></i>
+                <span>Profil</span>
+              </a>
+              <a href="dashboard.html" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-box text-gold4"></i>
+                <span>Abonamentele mele</span>
+              </a>
+              <button id="logoutBtn" class="w-full text-left px-4 py-3 hover:bg-red-500/10 transition flex items-center gap-3 text-red-400">
+                <i class="fa-solid fa-sign-out-alt"></i>
+                <span>Deconectare</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button id="menuBtn" class="md:hidden p-2 border border-yellow-600/30 rounded text-gold4"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="md:hidden hidden border-t border-yellow-600/20 bg-black/90">
+      <div class="max-w-7xl mx-auto px-4 py-3 grid grid-cols-1 gap-2 text-sm">
+        <a href="index.html" class="py-2 text-gold4">Acasă</a>
+        <a href="b2b.html" class="py-2">B2B</a>
+        <a href="b2c.html" class="py-2">B2C</a>
+        <a href="cat1.html" class="py-2">Businessuri</a>
+        <a href="cat2.html" class="py-2">Servicii</a>
+        <a href="cat3.html" class="py-2">Investitori</a>
+        <a href="calls.html" class="py-2">Call-uri</a>
+        <a href="ai.html" class="py-2">AI</a>
+        <a href="subscriptions.html" class="py-2">Subscriptions</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24 pb-20">
+    <section class="hero-section">
+      <div class="hero-gradient" aria-hidden="true"></div>
+      <div class="hero-orb" aria-hidden="true"></div>
+      <div class="hero-orb" aria-hidden="true"></div>
+      <div class="hero-orb" aria-hidden="true"></div>
+      <div class="hero-particle" aria-hidden="true"></div>
+      <div class="hero-particle" aria-hidden="true"></div>
+      <div class="hero-particle" aria-hidden="true"></div>
+      <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
+        <div class="text-center max-w-3xl mx-auto relative z-10">
+          <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border-gold bg-black/40 text-gold4 text-xs font-semibold animate-fade" data-animate>
+            <i class="fa-solid fa-sparkles"></i> Platformă Premium
+          </span>
+          <h1 class="mt-4 text-4xl md:text-6xl font-extrabold leading-tight animate-fade" data-animate>
+            Conectăm <span class="text-gold-gradient">afaceri</span>, <span class="text-gold-gradient">clienți</span> și <span class="text-gold-gradient">investitori</span>
+          </h1>
+          <p class="mt-4 text-zinc-300 text-lg animate-fade" data-animate data-delay="120">O pagină de start simplă și clară. Alege experiența potrivită pentru tine: B2B sau B2C.</p>
+          <div class="mt-8 flex flex-wrap gap-4 justify-center animate-fade" data-animate data-delay="200">
+            <a href="b2b.html" class="hero-button px-6 py-3 rounded-md font-semibold border-gold hover:shadow-gold-glow transition text-base">
+              <i class="fa-solid fa-building mr-2 text-gold4"></i> Pentru firme (B2B)
+            </a>
+            <a href="b2c.html" class="hero-button btn-gold px-6 py-3 rounded-md font-semibold text-base">
+              <i class="fa-solid fa-user mr-2"></i> Pentru persoane (B2C)
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-6 animate-fade" data-animate data-delay="320">
+      <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="border-gold rounded-xl p-6">
+            <i class="fa-solid fa-shield-halved text-gold4 text-2xl"></i>
+            <h3 class="mt-3 font-semibold">Siguranță și încredere</h3>
+            <p class="mt-2 text-sm text-zinc-300">Parteneri validați, procese transparente.</p>
+          </div>
+          <div class="border-gold rounded-xl p-6">
+            <i class="fa-solid fa-rocket text-gold4 text-2xl"></i>
+            <h3 class="mt-3 font-semibold">Creștere accelerată</h3>
+            <p class="mt-2 text-sm text-zinc-300">Conexiuni rapide și oportunități reale.</p>
+          </div>
+          <div class="border-gold rounded-xl p-6">
+            <i class="fa-solid fa-gem text-gold4 text-2xl"></i>
+            <h3 class="mt-3 font-semibold">Experiență premium</h3>
+            <p class="mt-2 text-sm text-zinc-300">UI modern și detalii atent lucrate.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Program Afiliați -->
+    <section class="mt-10 animate-fade" data-animate data-delay="420">
+      <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div class="border-gold rounded-2xl overflow-hidden">
+          <div class="relative p-8 md:p-10">
+            <div class="flex items-center gap-3 mb-4">
+              <i class="fa-solid fa-handshake text-gold4 text-3xl"></i>
+              <h2 class="text-3xl md:text-4xl font-bold">Devino Afiliat</h2>
+            </div>
+            <p class="text-lg text-zinc-300 max-w-3xl mb-8">
+              Câștigă comisioane pentru fiecare vânzare sau contract generat! Alătură-te programului nostru de afiliați,
+              primești materiale de marketing, link-uri de tracking și suport pentru a maximiza rezultatele.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div class="border-gold rounded-xl p-4 bg-black/40">
+                    <i class="fa-solid fa-percent text-gold4 text-xl mb-2"></i>
+                    <h3 class="font-semibold mb-1">Comisioane competitive</h3>
+                    <p class="text-sm text-zinc-300">Procente atractive pentru fiecare conversie</p>
+                  </div>
+                  <div class="border-gold rounded-xl p-4 bg-black/40">
+                    <i class="fa-solid fa-chart-line text-gold4 text-xl mb-2"></i>
+                    <h3 class="font-semibold mb-1">Tracking în timp real</h3>
+                    <p class="text-sm text-zinc-300">Urmărești clicks, conversii și comisioane</p>
+                  </div>
+                  <div class="border-gold rounded-xl p-4 bg-black/40">
+                    <i class="fa-solid fa-gift text-gold4 text-xl mb-2"></i>
+                    <h3 class="font-semibold mb-1">Materiale & suport</h3>
+                    <p class="text-sm text-zinc-300">Kit de promovare și suport dedicat</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border-gold rounded-xl p-6">
+                <h3 class="text-xl font-semibold mb-2">Aplică acum</h3>
+                <p class="text-sm text-zinc-300 mb-4">Completează formularul și te contactăm în cel mult 24 de ore.</p>
+                <form id="affiliateForm" class="grid grid-cols-1 gap-4">
+                  <input id="affName" name="name" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4 text-white" placeholder="Nume complet *" required />
+                  <input type="email" id="affEmail" name="email" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4 text-white" placeholder="Email *" required />
+                  <input id="affPhone" name="phone" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4 text-white" placeholder="Telefon *" required />
+                  <input id="affWebsite" name="website" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4 text-white" placeholder="Website / Social Media (opțional)" />
+                  <textarea id="affExperience" name="experience" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4 text-white" rows="3" placeholder="Experiență (opțional)"></textarea>
+                  <label class="flex items-center gap-2 text-sm text-zinc-300">
+                    <input type="checkbox" id="affTerms" class="w-4 h-4 border-gold bg-black/60 rounded" />
+                    Accept termenii programului de afiliere
+                  </label>
+                  <div id="affiliateError" class="text-red-400 text-sm hidden"></div>
+                  <div id="affiliateSuccess" class="text-gold4 text-sm hidden"><i class="fa-solid fa-check-circle mr-2"></i>Aplicație trimisă! Te vom contacta în cel mult 24 de ore.</div>
+                  <button type="submit" class="btn-gold px-6 py-3 rounded-md font-semibold">Trimite</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-black border-t border-yellow-600/20 py-10">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 text-zinc-300">
+      <div>
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-gold-gradient"></div>
+          <span class="text-lg font-semibold tracking-widest text-gold-gradient">GETASUBSCRIPTION</span>
+        </div>
+        <p class="mt-3 text-sm">Luxury business platform.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold text-white">Navigație</h4>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li><a href="b2b.html" class="hover:text-gold4">B2B</a></li>
+          <li><a href="b2c.html" class="hover:text-gold4">B2C</a></li>
+          <li><a href="cat1.html" class="hover:text-gold4">Businessuri</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-white">Resurse</h4>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li><a href="cat2.html" class="hover:text-gold4">Servicii</a></li>
+          <li><a href="cat3.html" class="hover:text-gold4">Investitori</a></li>
+          <li><a href="calls.html" class="hover:text-gold4">Call-uri</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-white">Contact</h4>
+        <div class="mt-3">
+          <a href="https://wa.me/40725669210" target="_blank" class="text-gold4 hover:underline"><i class="fa-brands fa-whatsapp mr-2"></i>0725669210</a>
+        </div>
+      </div>
+    </div>
+    <div class="mt-8 text-center text-xs text-zinc-500">© <span id="year"></span> GetASubscription. Toate drepturile rezervate.</div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 z-[70] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md" id="loginOverlay"></div>
+    <div class="relative z-10 w-[95%] max-w-md bg-black border-gold rounded-2xl shadow-gold-glow p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gold-gradient">Autentificare</h2>
+        <button id="closeLoginModal" class="text-zinc-400 hover:text-gold4 transition"><i class="fa-solid fa-times text-xl"></i></button>
+      </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Email</label>
+          <input type="email" id="loginEmail" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="email@exemplu.com">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Parolă</label>
+          <input type="password" id="loginPassword" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div id="loginError" class="hidden text-red-400 text-sm"></div>
+        <button type="submit" class="w-full btn-gold px-6 py-3 rounded-md font-semibold">Autentifică-te</button>
+        <p class="text-center text-sm text-zinc-400">Nu ai cont? <button type="button" id="switchToRegister" class="text-gold4 hover:underline">Înregistrează-te</button></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="fixed inset-0 z-[70] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md" id="registerOverlay"></div>
+    <div class="relative z-10 w-[95%] max-w-md bg-black border-gold rounded-2xl shadow-gold-glow p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gold-gradient">Înregistrare</h2>
+        <button id="closeRegisterModal" class="text-zinc-400 hover:text-gold4 transition"><i class="fa-solid fa-times text-xl"></i></button>
+      </div>
+      <form id="registerForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Nume complet</label>
+          <input type="text" id="registerName" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="Ion Popescu">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Email</label>
+          <input type="email" id="registerEmail" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="email@exemplu.com">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Parolă</label>
+          <input type="password" id="registerPassword" required minlength="6" class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Confirmă parola</label>
+          <input type="password" id="registerPasswordConfirm" required minlength="6" class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div id="registerError" class="hidden text-red-400 text-sm"></div>
+        <button type="submit" class="w-full btn-gold px-6 py-3 rounded-md font-semibold">Creează cont</button>
+        <p class="text-center text-sm text-zinc-400">Ai deja cont? <button type="button" id="switchToLogin" class="text-gold4 hover:underline">Autentifică-te</button></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- B2B/B2C Selection Modal (first visit) -->
+  <div id="b2bB2cModal" class="fixed inset-0 z-[60] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" id="b2bB2cOverlay"></div>
+    <div class="relative z-10 w-[95%] max-w-2xl bg-black border border-yellow-600/30 rounded-2xl shadow-gold-glow p-8">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold text-gold-gradient mb-2">Bine ai venit!</h2>
+        <p class="text-zinc-300">Ești firmă sau persoană fizică?</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button id="selectB2B" class="group border-gold rounded-xl p-6 text-left hover:shadow-gold-glow transition">
+          <div class="flex items-center justify-between mb-2">
+            <i class="fa-solid fa-building text-gold4 text-3xl"></i>
+            <i class="fa-solid fa-arrow-right text-gold4 opacity-0 group-hover:opacity-100 transition"></i>
+          </div>
+          <h3 class="text-xl font-bold">Firmă (B2B)</h3>
+          <p class="text-zinc-300 text-sm">Abonamente și servicii profesionale</p>
+        </button>
+        <button id="selectB2C" class="group border-gold rounded-xl p-6 text-left hover:shadow-gold-glow transition">
+          <div class="flex items-center justify-between mb-2">
+            <i class="fa-solid fa-user text-gold4 text-3xl"></i>
+            <i class="fa-solid fa-arrow-right text-gold4 opacity-0 group-hover:opacity-100 transition"></i>
+          </div>
+          <h3 class="text-xl font-bold">Persoană fizică (B2C)</h3>
+          <p class="text-zinc-300 text-sm">Mystery Boxes și abonamente entertainment</p>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('themeToggle');
+    const storedTheme = localStorage.getItem('themePreference');
+    if (storedTheme === 'light') {
+      root.classList.add('light-mode');
+    }
+    updateThemeAria();
+
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        root.classList.toggle('light-mode');
+        const isLight = root.classList.contains('light-mode');
+        localStorage.setItem('themePreference', isLight ? 'light' : 'dark');
+        updateThemeAria();
+      });
+    }
+
+    function updateThemeAria() {
+      if (!themeToggle) return;
+      const isLight = root.classList.contains('light-mode');
+      themeToggle.setAttribute('aria-label', isLight ? 'Comută modul întunecat' : 'Comută modul luminos');
+    }
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Mobile menu
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (menuBtn) menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+    // Scroll animations
+    const animatedEls = document.querySelectorAll('[data-animate]');
+    const fadeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const delay = parseInt(entry.target.dataset.delay || '0', 10);
+          setTimeout(() => entry.target.classList.add('visible'), delay);
+          fadeObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    animatedEls.forEach(el => fadeObserver.observe(el));
+
+    // B2B/B2C Modal
+    const b2bB2cModal = document.getElementById('b2bB2cModal');
+    const b2bB2cOverlay = document.getElementById('b2bB2cOverlay');
+    const selectB2B = document.getElementById('selectB2B');
+    const selectB2C = document.getElementById('selectB2C');
+
+    function showB2B2C() {
+      if (sessionStorage.getItem('b2bB2cSelected') === 'true') return;
+      b2bB2cModal.classList.remove('hidden');
+      b2bB2cModal.classList.add('flex');
+    }
+    function closeB2B2C() {
+      b2bB2cModal.classList.add('hidden');
+      b2bB2cModal.classList.remove('flex');
+      sessionStorage.setItem('b2bB2cSelected', 'true');
+    }
+    if (b2bB2cOverlay) b2bB2cOverlay.addEventListener('click', closeB2B2C);
+    if (selectB2B) selectB2B.addEventListener('click', () => { closeB2B2C(); window.location.href='b2b.html'; });
+    if (selectB2C) selectB2C.addEventListener('click', () => { closeB2B2C(); window.location.href='b2c.html'; });
+    // Show modal on first visit in this session
+    showB2B2C();
+
+    // Account dropdown & auth
+    const accountBtn = document.getElementById('accountBtn');
+    const accountDropdown = document.getElementById('accountDropdown');
+    const accountMenuLoggedOut = document.getElementById('accountMenuLoggedOut');
+    const accountMenuLoggedIn = document.getElementById('accountMenuLoggedIn');
+    const affiliateForm = document.getElementById('affiliateForm');
+    const loginModal = document.getElementById('loginModal');
+    const registerModal = document.getElementById('registerModal');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    function checkAuth() {
+      const user = localStorage.getItem('currentUser');
+      if (user) {
+        const userData = JSON.parse(user);
+        accountMenuLoggedOut.classList.add('hidden');
+        accountMenuLoggedIn.classList.remove('hidden');
+        document.getElementById('userNameDisplay').textContent = userData.name;
+        document.getElementById('userEmailDisplay').textContent = userData.email;
+      } else {
+        accountMenuLoggedOut.classList.remove('hidden');
+        accountMenuLoggedIn.classList.add('hidden');
+      }
+    }
+    function closeDropdown(){ accountDropdown.classList.add('hidden'); }
+    accountBtn.addEventListener('click', (e) => { e.stopPropagation(); accountDropdown.classList.toggle('hidden'); });
+    document.addEventListener('click', (e) => { if (!e.target.closest('#accountDropdownContainer')) closeDropdown(); });
+
+    function openLoginModal(){ registerModal.classList.add('hidden'); loginModal.classList.remove('hidden'); loginModal.classList.add('flex'); document.getElementById('loginError').classList.add('hidden'); }
+    function closeLoginModal(){ loginModal.classList.add('hidden'); loginModal.classList.remove('flex'); }
+    function openRegisterModal(){ loginModal.classList.add('hidden'); registerModal.classList.remove('hidden'); registerModal.classList.add('flex'); document.getElementById('registerError').classList.add('hidden'); }
+    function closeRegisterModal(){ registerModal.classList.add('hidden'); registerModal.classList.remove('flex'); }
+
+    document.getElementById('openLoginBtn').addEventListener('click', () => { closeDropdown(); openLoginModal(); });
+    document.getElementById('openRegisterBtn').addEventListener('click', () => { closeDropdown(); openRegisterModal(); });
+    document.getElementById('closeLoginModal').addEventListener('click', closeLoginModal);
+    document.getElementById('closeRegisterModal').addEventListener('click', closeRegisterModal);
+    document.getElementById('loginOverlay').addEventListener('click', closeLoginModal);
+    document.getElementById('registerOverlay').addEventListener('click', closeRegisterModal);
+    document.getElementById('switchToRegister').addEventListener('click', openRegisterModal);
+    document.getElementById('switchToLogin').addEventListener('click', openLoginModal);
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = users.find(u => u.email === email && u.password === password);
+      if (user) {
+        localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email }));
+        checkAuth();
+        closeLoginModal();
+        loginForm.reset();
+      } else {
+        errorEl.textContent = 'Email sau parolă incorectă.';
+        errorEl.classList.remove('hidden');
+      }
+    });
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('registerName').value.trim();
+      const email = document.getElementById('registerEmail').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+      const errorEl = document.getElementById('registerError');
+      if (password !== passwordConfirm) { errorEl.textContent = 'Parolele nu coincid.'; errorEl.classList.remove('hidden'); return; }
+      if (password.length < 6) { errorEl.textContent = 'Parola trebuie să aibă cel puțin 6 caractere.'; errorEl.classList.remove('hidden'); return; }
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      if (users.find(u => u.email === email)) { errorEl.textContent = 'Acest email este deja înregistrat.'; errorEl.classList.remove('hidden'); return; }
+      users.push({ name, email, password });
+      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('currentUser', JSON.stringify({ name, email }));
+      checkAuth();
+      closeRegisterModal();
+      registerForm.reset();
+    });
+    if (logoutBtn) logoutBtn.addEventListener('click', () => { localStorage.removeItem('currentUser'); checkAuth(); closeDropdown(); });
+    checkAuth();
+
+    // Affiliate form
+    if (affiliateForm) {
+      affiliateForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const errorEl = document.getElementById('affiliateError');
+        const successEl = document.getElementById('affiliateSuccess');
+        errorEl.classList.add('hidden');
+        successEl.classList.add('hidden');
+
+        const name = document.getElementById('affName').value.trim();
+        const email = document.getElementById('affEmail').value.trim();
+        const phone = document.getElementById('affPhone').value.trim();
+        const terms = document.getElementById('affTerms').checked;
+
+        if (!name || !email || !phone) {
+          errorEl.textContent = 'Te rugăm să completezi toate câmpurile obligatorii.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          errorEl.textContent = 'Te rugăm să introduci o adresă de email validă.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+        if (!terms) {
+          errorEl.textContent = 'Trebuie să accepți termenii programului de afiliere.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+
+        const formData = {
+          name,
+          email,
+          phone,
+          website: document.getElementById('affWebsite').value.trim(),
+          experience: document.getElementById('affExperience').value.trim(),
+          timestamp: Date.now()
+        };
+        const leads = JSON.parse(localStorage.getItem('affiliateLeads') || '[]');
+        if (!leads.find(l => l.email === email)) {
+          leads.push(formData);
+          localStorage.setItem('affiliateLeads', JSON.stringify(leads));
+        }
+        localStorage.setItem('affiliateFormData', JSON.stringify(formData));
+
+        successEl.classList.remove('hidden');
+        affiliateForm.reset();
+        setTimeout(() => {
+          successEl.classList.add('hidden');
+          window.location.href = 'affiliate-dashboard.html';
+        }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>
+

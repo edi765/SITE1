@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard – GetASubscription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{gold1:'#a67c00',gold2:'#bf9b30',gold3:'#ffbf00',gold4:'#ffcf40',gold5:'#ffdc73'},boxShadow:{'gold-glow':'0 0 20px rgba(191,155,48,0.45), inset 0 0 12px rgba(255,207,64,0.35)'},backgroundImage:{'gold-gradient':'linear-gradient(135deg,#a67c00 0%,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73 100%)'}}}}</script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root{color-scheme:dark}
+    .light-mode{color-scheme:light}
+    body{transition:background .3s ease,color .3s ease}
+    header{background:rgba(0,0,0,0.4);border-bottom:1px solid rgba(191,155,48,.2);transition:background .3s ease,border-color .3s ease}
+    .theme-toggle{width:36px;height:36px;border-radius:9999px;border:1px solid rgba(191,155,48,.45);background:rgba(255,255,255,0.06);color:#facc15;display:inline-flex;align-items:center;justify-content:center;transition:transform .2s ease,box-shadow .2s ease,background .2s ease,color .2s ease}
+    .theme-toggle:hover{transform:translateY(-1px);box-shadow:0 0 12px rgba(191,155,48,.3)}
+    .theme-toggle i{font-size:.95rem}
+    .theme-toggle .icon-moon{display:none}
+    body{background:#000;color:#e7e7e7;font-family:'Montserrat','Poppins',system-ui}
+    .btn-gold{background-image:linear-gradient(135deg,#a67c00,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73);color:#111;box-shadow:0 0 0 1px rgba(255,207,64,.35) inset,0 8px 24px rgba(255,191,0,.25);transition:transform .2s,box-shadow .2s}
+    .btn-gold:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,220,115,.55) inset,0 12px 32px rgba(255,207,64,.35)}
+    .border-gold{border:1px solid rgba(191,155,48,.35);box-shadow:inset 0 0 12px rgba(191,155,48,.15),0 0 24px rgba(191,155,48,.12)}
+    .text-gold-gradient{background:linear-gradient(135deg,#a67c00,#ffbf00,#ffdc73);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .light-mode body{background:#f6f5f0;color:#1f1f1f}
+    .light-mode header{background:rgba(255,255,255,0.85);border-bottom:1px solid rgba(191,155,48,.3)}
+    .light-mode .border-gold{box-shadow:inset 0 0 12px rgba(191,155,48,.08),0 0 18px rgba(191,155,48,.1)}
+    .light-mode .bg-black{background:#ffffff!important}
+    .light-mode .bg-black\/40{background:rgba(255,255,255,0.85)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/60{background:rgba(255,255,255,0.9)!important;color:#1f1f1f!important}
+    .light-mode .text-zinc-300{color:#394150!important}
+    .light-mode .text-zinc-400{color:#4b5563!important}
+    .light-mode .text-zinc-500{color:#6b7280!important}
+    .light-mode [class*="border-yellow-600/20"]{border-color:rgba(191,155,48,0.28)!important}
+    .light-mode .theme-toggle{background:rgba(255,255,255,0.95);color:#7c5800;border-color:rgba(191,155,48,.45)}
+    .light-mode .theme-toggle .icon-sun{display:none}
+    .light-mode .theme-toggle .icon-moon{display:inline-block}
+  </style>
+</head>
+<body>
+  <header class="fixed top-0 inset-x-0 z-50 backdrop-blur bg-black/40 border-b border-yellow-600/20">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gold-gradient"></div><span class="text-xl font-semibold tracking-widest bg-gold-gradient bg-clip-text text-transparent">GetASubscription</span></a>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="index.html" class="hover:text-gold4 transition">Acasă</a>
+        <a href="b2b.html" class="hover:text-gold4 transition">B2B</a>
+        <a href="b2c.html" class="hover:text-gold4 transition">B2C</a>
+        <a href="dashboard.html" class="hover:text-gold4 transition text-gold4">Dashboard</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" type="button" class="theme-toggle" aria-label="Comută modul luminos">
+          <i class="fa-solid fa-sun icon-sun"></i>
+          <i class="fa-solid fa-moon icon-moon"></i>
+        </button>
+        <div class="relative" id="accountDropdownContainer">
+          <button id="accountBtn" class="p-2 border border-yellow-600/30 rounded-full text-gold4 hover:shadow-gold-glow transition">
+            <i class="fa-solid fa-user text-lg"></i>
+          </button>
+          <div id="accountDropdown" class="hidden absolute right-0 mt-2 w-56 bg-black border-gold rounded-xl shadow-gold-glow overflow-hidden z-50">
+            <div id="accountMenuLoggedIn">
+              <div class="px-4 py-3 border-b border-yellow-600/20">
+                <p class="text-sm text-zinc-400">Conectat ca</p>
+                <p id="userNameDisplay" class="font-semibold text-gold4"></p>
+                <p id="userEmailDisplay" class="text-xs text-zinc-500"></p>
+              </div>
+              <a href="dashboard.html" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3 text-gold4">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Dashboard</span>
+              </a>
+              <a href="#" id="profileLink" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-user-circle text-gold4"></i>
+                <span>Profil</span>
+              </a>
+              <a href="#" id="subscriptionsLink" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-box text-gold4"></i>
+                <span>Abonamentele mele</span>
+              </a>
+              <button id="logoutBtn" class="w-full text-left px-4 py-3 hover:bg-red-500/10 transition flex items-center gap-3 text-red-400">
+                <i class="fa-solid fa-sign-out-alt"></i>
+                <span>Deconectare</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24 pb-20">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+      <div class="mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-gold-gradient mb-2">Dashboard</h1>
+        <p class="text-zinc-300">Gestionează-ți abonamentele, comenziile și setările contului</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="border-gold rounded-xl p-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-zinc-400 text-sm">Abonamente active</span>
+            <i class="fa-solid fa-box text-gold4 text-xl"></i>
+          </div>
+          <div class="text-3xl font-bold text-gold4" id="activeSubscriptions">0</div>
+        </div>
+        <div class="border-gold rounded-xl p-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-zinc-400 text-sm">Total cheltuit</span>
+            <i class="fa-solid fa-dollar-sign text-gold4 text-xl"></i>
+          </div>
+          <div class="text-3xl font-bold text-gold4" id="totalSpent">$0</div>
+        </div>
+        <div class="border-gold rounded-xl p-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-zinc-400 text-sm">Comenzi totale</span>
+            <i class="fa-solid fa-shopping-cart text-gold4 text-xl"></i>
+          </div>
+          <div class="text-3xl font-bold text-gold4" id="totalOrders">0</div>
+        </div>
+        <div class="border-gold rounded-xl p-6">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-zinc-400 text-sm">Următorul plată</span>
+            <i class="fa-solid fa-calendar text-gold4 text-xl"></i>
+          </div>
+          <div class="text-lg font-bold text-gold4" id="nextPayment">-</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="border-gold rounded-xl overflow-hidden mb-6">
+        <div class="flex border-b border-yellow-600/20">
+          <button class="tab-btn active px-6 py-4 font-semibold text-gold4 border-b-2 border-gold4" data-tab="subscriptions">Abonamente active</button>
+          <button class="tab-btn px-6 py-4 font-semibold text-zinc-400 hover:text-gold4 transition" data-tab="history">Istoric comenzi</button>
+          <button class="tab-btn px-6 py-4 font-semibold text-zinc-400 hover:text-gold4 transition" data-tab="profile">Profil</button>
+        </div>
+
+        <!-- Tab: Abonamente active -->
+        <div id="tab-subscriptions" class="tab-content p-6">
+          <div id="subscriptionsList" class="space-y-4">
+            <!-- Abonamentele vor fi populate dinamic -->
+          </div>
+          <div id="noSubscriptions" class="text-center py-12 text-zinc-400 hidden">
+            <i class="fa-solid fa-box-open text-4xl mb-4"></i>
+            <p>Nu ai abonamente active.</p>
+            <a href="b2c.html" class="btn-gold px-6 py-3 rounded-md font-semibold inline-block mt-4">Explorează abonamente</a>
+          </div>
+        </div>
+
+        <!-- Tab: Istoric comenzi -->
+        <div id="tab-history" class="tab-content p-6 hidden">
+          <div id="ordersList" class="space-y-4">
+            <!-- Comenzile vor fi populate dinamic -->
+          </div>
+          <div id="noOrders" class="text-center py-12 text-zinc-400 hidden">
+            <i class="fa-solid fa-receipt text-4xl mb-4"></i>
+            <p>Nu ai comenzi în istoric.</p>
+          </div>
+        </div>
+
+        <!-- Tab: Profil -->
+        <div id="tab-profile" class="tab-content p-6 hidden">
+          <div class="max-w-2xl">
+            <h3 class="text-2xl font-semibold mb-6">Informații personale</h3>
+            <form id="profileForm" class="space-y-4">
+              <div>
+                <label class="block text-sm text-zinc-300 mb-2">Nume complet</label>
+                <input type="text" id="profileName" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4" required>
+              </div>
+              <div>
+                <label class="block text-sm text-zinc-300 mb-2">Email</label>
+                <input type="email" id="profileEmail" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4" required>
+              </div>
+              <div>
+                <label class="block text-sm text-zinc-300 mb-2">Telefon</label>
+                <input type="tel" id="profilePhone" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4">
+              </div>
+              <div>
+                <label class="block text-sm text-zinc-300 mb-2">Adresă</label>
+                <textarea id="profileAddress" rows="3" class="w-full border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4"></textarea>
+              </div>
+              <div id="profileError" class="text-red-400 text-sm hidden"></div>
+              <div id="profileSuccess" class="text-gold4 text-sm hidden"><i class="fa-solid fa-check-circle mr-2"></i>Profil actualizat cu succes!</div>
+              <button type="submit" class="btn-gold px-6 py-3 rounded-md font-semibold">Salvează modificări</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const root=document.documentElement;
+    const themeToggle=document.getElementById('themeToggle');
+    const storedTheme=localStorage.getItem('themePreference');
+    if(storedTheme==='light'){root.classList.add('light-mode');}
+    updateThemeAria();
+    if(themeToggle){themeToggle.addEventListener('click',()=>{root.classList.toggle('light-mode');const isLight=root.classList.contains('light-mode');localStorage.setItem('themePreference',isLight?'light':'dark');updateThemeAria();});}
+    function updateThemeAria(){if(!themeToggle)return;const isLight=root.classList.contains('light-mode');themeToggle.setAttribute('aria-label',isLight?'Comută modul întunecat':'Comută modul luminos');}
+
+    // Check authentication
+    function checkAuth() {
+      const user = localStorage.getItem('currentUser');
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      const userData = JSON.parse(user);
+      document.getElementById('userNameDisplay').textContent = userData.name;
+      document.getElementById('userEmailDisplay').textContent = userData.email;
+      
+      // Load user data
+      loadUserData(userData);
+    }
+
+    // Load user subscriptions and orders
+    function loadUserData(userData) {
+      const subscriptions = JSON.parse(localStorage.getItem('userSubscriptions') || '[]');
+      const orders = JSON.parse(localStorage.getItem('userOrders') || '[]');
+      
+      // Update stats
+      document.getElementById('activeSubscriptions').textContent = subscriptions.filter(s => s.status === 'active').length;
+      const totalSpent = subscriptions.reduce((sum, s) => sum + (parseFloat(s.total) || 0), 0);
+      document.getElementById('totalSpent').textContent = '$' + totalSpent.toFixed(2);
+      document.getElementById('totalOrders').textContent = orders.length;
+      
+      // Next payment
+      const activeSubs = subscriptions.filter(s => s.status === 'active');
+      if (activeSubs.length > 0) {
+        const nextDate = new Date();
+        nextDate.setMonth(nextDate.getMonth() + 1);
+        document.getElementById('nextPayment').textContent = nextDate.toLocaleDateString('ro-RO');
+      }
+      
+      // Load subscriptions
+      loadSubscriptions(subscriptions);
+      loadOrders(orders);
+      loadProfile(userData);
+    }
+
+    // Load subscriptions
+    function loadSubscriptions(subscriptions) {
+      const container = document.getElementById('subscriptionsList');
+      const noSubs = document.getElementById('noSubscriptions');
+      
+      if (subscriptions.length === 0) {
+        container.innerHTML = '';
+        noSubs.classList.remove('hidden');
+        return;
+      }
+      
+      noSubs.classList.add('hidden');
+      container.innerHTML = subscriptions.map(sub => `
+        <div class="border-gold rounded-xl p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h3 class="text-xl font-semibold mb-1">${sub.name}</h3>
+              <p class="text-sm text-zinc-400">Tier: $${sub.tier}/lună</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold ${sub.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">${sub.status === 'active' ? 'Activ' : 'Inactiv'}</span>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
+            <div>
+              <span class="text-zinc-400">Total/lună:</span>
+              <div class="font-semibold text-gold4">${sub.total}</div>
+            </div>
+            <div>
+              <span class="text-zinc-400">Temă:</span>
+              <div class="font-semibold">${sub.theme || 'N/A'}</div>
+            </div>
+            <div>
+              <span class="text-zinc-400">Ambalare:</span>
+              <div class="font-semibold">${sub.packaging || 'Standard'}</div>
+            </div>
+            <div>
+              <span class="text-zinc-400">Următorul plată:</span>
+              <div class="font-semibold">${new Date(sub.nextPayment || Date.now() + 30*24*60*60*1000).toLocaleDateString('ro-RO')}</div>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button class="edit-subscription btn-gold px-4 py-2 rounded-md text-sm font-semibold" data-id="${sub.id}">Editează</button>
+            <button class="cancel-subscription px-4 py-2 rounded-md text-sm font-semibold border-gold hover:shadow-gold-glow transition" data-id="${sub.id}">Anulează</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Load orders
+    function loadOrders(orders) {
+      const container = document.getElementById('ordersList');
+      const noOrders = document.getElementById('noOrders');
+      
+      if (orders.length === 0) {
+        container.innerHTML = '';
+        noOrders.classList.remove('hidden');
+        return;
+      }
+      
+      noOrders.classList.add('hidden');
+      container.innerHTML = orders.map(order => `
+        <div class="border-gold rounded-xl p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h3 class="text-lg font-semibold mb-1">Comandă #${order.id}</h3>
+              <p class="text-sm text-zinc-400">${new Date(order.date).toLocaleDateString('ro-RO')}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gold-gradient text-black">${order.total}</span>
+          </div>
+          <div class="text-sm text-zinc-300">
+            <p><strong>Produs:</strong> ${order.product}</p>
+            <p><strong>Status:</strong> ${order.status}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Load profile
+    function loadProfile(userData) {
+      document.getElementById('profileName').value = userData.name || '';
+      document.getElementById('profileEmail').value = userData.email || '';
+      document.getElementById('profilePhone').value = userData.phone || '';
+      document.getElementById('profileAddress').value = userData.address || '';
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tab = this.getAttribute('data-tab');
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('active', 'text-gold4', 'border-b-2', 'border-gold4');
+          b.classList.add('text-zinc-400');
+        });
+        this.classList.add('active', 'text-gold4', 'border-b-2', 'border-gold4');
+        this.classList.remove('text-zinc-400');
+        
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.add('hidden');
+        });
+        document.getElementById('tab-' + tab).classList.remove('hidden');
+      });
+    });
+
+    // Profile form
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const user = JSON.parse(localStorage.getItem('currentUser'));
+      user.name = document.getElementById('profileName').value;
+      user.phone = document.getElementById('profilePhone').value;
+      user.address = document.getElementById('profileAddress').value;
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      
+      document.getElementById('profileSuccess').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('profileSuccess').classList.add('hidden');
+      }, 3000);
+    });
+
+    // Account dropdown
+    const accountBtn = document.getElementById('accountBtn');
+    const accountDropdown = document.getElementById('accountDropdown');
+    accountBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      accountDropdown.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#accountDropdownContainer')) {
+        accountDropdown.classList.add('hidden');
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+      localStorage.removeItem('currentUser');
+      window.location.href = 'index.html';
+    });
+
+    // Check for last subscription and add it
+    const lastSubscription = localStorage.getItem('lastSubscription');
+    if (lastSubscription) {
+      const sub = JSON.parse(lastSubscription);
+      const subscriptions = JSON.parse(localStorage.getItem('userSubscriptions') || '[]');
+      sub.id = Date.now().toString();
+      sub.status = 'active';
+      sub.nextPayment = Date.now() + 30*24*60*60*1000;
+      subscriptions.push(sub);
+      localStorage.setItem('userSubscriptions', JSON.stringify(subscriptions));
+      localStorage.removeItem('lastSubscription');
+    }
+
+    // Initialize
+    checkAuth();
+  </script>
+</body>
+</html>
+
+

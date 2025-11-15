@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout – GetASubscription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{gold1:'#a67c00',gold2:'#bf9b30',gold3:'#ffbf00',gold4:'#ffcf40',gold5:'#ffdc73'},boxShadow:{'gold-glow':'0 0 20px rgba(191,155,48,0.45), inset 0 0 12px rgba(255,207,64,0.35)'},backgroundImage:{'gold-gradient':'linear-gradient(135deg,#a67c00 0%,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73 100%)'}}}}</script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Stripe.js -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body{background:#000;color:#e7e7e7;font-family:'Montserrat','Poppins',system-ui}
+    .btn-gold{background-image:linear-gradient(135deg,#a67c00,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73);color:#111;box-shadow:0 0 0 1px rgba(255,207,64,.35) inset,0 8px 24px rgba(255,191,0,.25);transition:transform .2s,box-shadow .2s}
+    .btn-gold:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(255,220,115,.55) inset,0 12px 32px rgba(255,207,64,.35)}
+    .border-gold{border:1px solid rgba(191,155,48,.35);box-shadow:inset 0 0 12px rgba(191,155,48,.15),0 0 24px rgba(191,155,48,.12)}
+    .text-gold-gradient{background:linear-gradient(135deg,#a67c00,#ffbf00,#ffdc73);-webkit-background-clip:text;background-clip:text;color:transparent}
+  </style>
+</head>
+<body>
+  <header class="fixed top-0 inset-x-0 z-50 backdrop-blur bg-black/40 border-b border-yellow-600/20">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gold-gradient"></div><span class="text-xl font-semibold tracking-widest bg-gold-gradient bg-clip-text text-transparent">GetASubscription</span></a>
+      <a href="b2c.html" class="text-sm text-gold4 hover:underline">← Înapoi</a>
+    </div>
+  </header>
+
+  <main class="pt-24 pb-20">
+    <div class="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
+      <h1 class="text-4xl font-bold text-gold-gradient mb-8">Finalizează comanda</h1>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Order Summary -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Subscription Details -->
+          <div class="border-gold rounded-xl p-6">
+            <h2 class="text-2xl font-semibold mb-4">Detalii abonament</h2>
+            <div id="subscriptionDetails" class="space-y-3">
+              <!-- Populated from localStorage -->
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="border-gold rounded-xl p-6">
+            <h2 class="text-2xl font-semibold mb-4">Metodă de plată</h2>
+            <div class="space-y-4">
+              <div class="border-gold rounded-lg p-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="paymentMethod" value="stripe" class="w-4 h-4 border-gold bg-black/60" checked>
+                  <div>
+                    <div class="font-semibold">Card bancar (Stripe)</div>
+                    <div class="text-sm text-zinc-400">Visa, Mastercard, American Express</div>
+                  </div>
+                </label>
+              </div>
+              <div class="border-gold rounded-lg p-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="radio" name="paymentMethod" value="payu" class="w-4 h-4 border-gold bg-black/60">
+                  <div>
+                    <div class="font-semibold">PayU</div>
+                    <div class="text-sm text-zinc-400">Plăți online sigure</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stripe Payment Form -->
+          <div id="stripePaymentForm" class="border-gold rounded-xl p-6">
+            <h3 class="text-xl font-semibold mb-4">Detalii card</h3>
+            <form id="paymentForm">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm text-zinc-300 mb-2">Număr card</label>
+                  <div id="cardNumber" class="border-gold bg-black/60 rounded-md px-4 py-3"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm text-zinc-300 mb-2">Data expirării</label>
+                    <div id="cardExpiry" class="border-gold bg-black/60 rounded-md px-4 py-3"></div>
+                  </div>
+                  <div>
+                    <label class="block text-sm text-zinc-300 mb-2">CVC</label>
+                    <div id="cardCvc" class="border-gold bg-black/60 rounded-md px-4 py-3"></div>
+                  </div>
+                </div>
+                <div id="cardErrors" class="text-red-400 text-sm hidden"></div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="lg:col-span-1">
+          <div class="border-gold rounded-xl p-6 sticky top-24">
+            <h2 class="text-xl font-semibold mb-4">Rezumat comandă</h2>
+            <div id="orderSummary" class="space-y-3 mb-4">
+              <!-- Populated dynamically -->
+            </div>
+            <div class="border-t border-yellow-600/30 pt-4 mt-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-zinc-300">Subtotal:</span>
+                <span id="subtotal" class="font-semibold">$0</span>
+              </div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-zinc-300">Transport:</span>
+                <span id="shippingCost" class="font-semibold">$0</span>
+              </div>
+              <div class="flex items-center justify-between text-lg font-bold text-gold4 pt-2 border-t border-yellow-600/30">
+                <span>Total:</span>
+                <span id="totalAmount">$0</span>
+              </div>
+            </div>
+            <button id="payButton" class="btn-gold w-full px-6 py-3 rounded-md font-semibold text-lg mt-6">
+              <i class="fa-solid fa-lock mr-2"></i>Plătește acum
+            </button>
+            <p class="text-xs text-zinc-400 text-center mt-4">Plata este securizată și procesată de Stripe</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Initialize Stripe (replace with your publishable key)
+    const stripe = Stripe('pk_test_...'); // Replace with actual key
+    const elements = stripe.elements();
+    
+    // Load subscription data from localStorage
+    const subscriptionData = JSON.parse(localStorage.getItem('lastSubscription') || '{}');
+    
+    if (!subscriptionData.name) {
+      window.location.href = 'b2c.html';
+    }
+    
+    // Display subscription details
+    function displaySubscriptionDetails() {
+      const detailsContainer = document.getElementById('subscriptionDetails');
+      detailsContainer.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-300">Abonament:</span>
+          <span class="font-semibold">${subscriptionData.name || 'N/A'}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-300">Tier:</span>
+          <span class="font-semibold">$${subscriptionData.tier || 0}/lună</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-300">Temă:</span>
+          <span class="font-semibold">${subscriptionData.theme || 'N/A'}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-zinc-300">Ambalare:</span>
+          <span class="font-semibold">${subscriptionData.packaging || 'Standard'}</span>
+        </div>
+      `;
+      
+      // Calculate totals
+      const basePrice = parseFloat(subscriptionData.tier) || 0;
+      const themeCost = subscriptionData.theme === 'none' ? 0 : (subscriptionData.theme === 'starwars' ? 15 : 10);
+      const packagingCost = subscriptionData.packaging === 'gift' ? 5 : (subscriptionData.packaging === 'protection' ? 50 : (subscriptionData.packaging === 'premium' ? 25 : 0));
+      const shippingCost = parseFloat(subscriptionData.shipping?.distance || 0) * 0.5 + 10;
+      const total = basePrice + themeCost + packagingCost + shippingCost;
+      
+      document.getElementById('subtotal').textContent = '$' + (basePrice + themeCost + packagingCost).toFixed(2);
+      document.getElementById('shippingCost').textContent = '$' + shippingCost.toFixed(2);
+      document.getElementById('totalAmount').textContent = '$' + total.toFixed(2);
+    }
+    
+    // Initialize Stripe Elements
+    const cardNumber = elements.create('cardNumber');
+    cardNumber.mount('#cardNumber');
+    
+    const cardExpiry = elements.create('cardExpiry');
+    cardExpiry.mount('#cardExpiry');
+    
+    const cardCvc = elements.create('cardCvc');
+    cardCvc.mount('#cardCvc');
+    
+    // Handle payment
+    document.getElementById('payButton').addEventListener('click', async function(e) {
+      e.preventDefault();
+      const button = this;
+      button.disabled = true;
+      button.textContent = 'Procesare...';
+      
+      try {
+        // Create payment method
+        const {paymentMethod, error} = await stripe.createPaymentMethod({
+          type: 'card',
+          card: cardNumber,
+          billing_details: {
+            name: subscriptionData.name,
+            email: subscriptionData.email,
+            phone: subscriptionData.phone,
+            address: {
+              line1: subscriptionData.address
+            }
+          }
+        });
+        
+        if (error) {
+          document.getElementById('cardErrors').textContent = error.message;
+          document.getElementById('cardErrors').classList.remove('hidden');
+          button.disabled = false;
+          button.innerHTML = '<i class="fa-solid fa-lock mr-2"></i>Plătește acum';
+          return;
+        }
+        
+        // Here you would send paymentMethod.id to your backend
+        // Backend would create a subscription and return success
+        
+        // For now, simulate success
+        const subscription = {
+          id: 'sub_' + Date.now(),
+          name: subscriptionData.name,
+          tier: subscriptionData.tier,
+          total: document.getElementById('totalAmount').textContent,
+          status: 'active',
+          nextPayment: Date.now() + 30*24*60*60*1000
+        };
+        
+        // Save subscription
+        const subscriptions = JSON.parse(localStorage.getItem('userSubscriptions') || '[]');
+        subscriptions.push(subscription);
+        localStorage.setItem('userSubscriptions', JSON.stringify(subscriptions));
+        
+        // Track affiliate conversion
+        if (window.AffiliateTracking) {
+          window.AffiliateTracking.trackSubscription(subscriptionData);
+        }
+        
+        // Redirect to success
+        window.location.href = 'dashboard.html?success=1';
+        
+      } catch (err) {
+        document.getElementById('cardErrors').textContent = 'Eroare la procesarea plății. Te rugăm să încerci din nou.';
+        document.getElementById('cardErrors').classList.remove('hidden');
+        button.disabled = false;
+        button.innerHTML = '<i class="fa-solid fa-lock mr-2"></i>Plătește acum';
+      }
+    });
+    
+    // Initialize
+    displaySubscriptionDetails();
+  </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI – GetASubscription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{gold1:'#a67c00',gold2:'#bf9b30',gold3:'#ffbf00',gold4:'#ffcf40',gold5:'#ffdc73',royal:'#6a0dad'},boxShadow:{'gold-glow':'0 0 20px rgba(191,155,48,0.45), inset 0 0 12px rgba(255,207,64,0.35)'},backgroundImage:{'gold-gradient':'linear-gradient(135deg,#a67c00 0%,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73 100%)'}}}}</script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root{color-scheme:dark}
+    .light-mode{color-scheme:light}
+    body{transition:background .3s ease,color .3s ease}
+    header{background:rgba(0,0,0,0.4);border-bottom:1px solid rgba(191,155,48,.2);transition:background .3s ease,border-color .3s ease}
+    .theme-toggle{width:36px;height:36px;border-radius:9999px;border:1px solid rgba(191,155,48,.45);background:rgba(255,255,255,0.06);color:#facc15;display:inline-flex;align-items:center;justify-content:center;transition:transform .2s ease,box-shadow .2s ease,background .2s ease,color .2s ease}
+    .theme-toggle:hover{transform:translateY(-1px);box-shadow:0 0 12px rgba(191,155,48,.3)}
+    .theme-toggle i{font-size:.95rem}
+    .theme-toggle .icon-moon{display:none}
+    body{background:#000;color:#e7e7e7;font-family:'Montserrat','Poppins',system-ui}
+    .btn-gold{background-image:linear-gradient(135deg,#a67c00,#bf9b30 25%,#ffbf00 50%,#ffcf40 75%,#ffdc73);color:#111;box-shadow:0 0 0 1px rgba(255,207,64,.35) inset,0 8px 24px rgba(255,191,0,.25)}
+    .border-gold{border:1px solid rgba(191,155,48,.35);box-shadow:inset 0 0 12px rgba(191,155,48,.15),0 0 24px rgba(191,155,48,.12)}
+    .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s,transform .7s}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    @keyframes blink{0%,92%,100%{height:6px}95%{height:1px}}
+    .robot{position:fixed;right:22px;bottom:22px;z-index:60;display:flex;align-items:center;gap:10px}
+    .robot .bubble{display:none}
+    .robot.open .bubble{display:block}
+    .robot-head{width:56px;height:56px;border-radius:50%;background-image:linear-gradient(135deg,#2a1738,#6a0dad 50%,#bf9b30);box-shadow:0 0 18px rgba(106,13,173,.45),0 0 10px rgba(191,155,48,.25) inset;position:relative;animation:floaty 3s ease-in-out infinite;cursor:pointer}
+    .robot-head::before{content:"";position:absolute;left:50%;top:-10px;width:2px;height:10px;background:#bf9b30;transform:translateX(-50%)}
+    .eye{position:absolute;width:6px;background:#ffdc73;border-radius:3px;top:24px;animation:blink 4s infinite}
+    .eye.left{left:18px}
+    .eye.right{right:18px}
+    .bubble{max-width:220px;background:#0b0b0b;border:1px solid rgba(191,155,48,.35);box-shadow:0 0 18px rgba(191,155,48,.18);padding:10px 12px;border-radius:10px}
+    .text-gold-gradient{background:linear-gradient(135deg,#a67c00,#ffbf00,#ffdc73);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero-banner{position:relative;overflow:hidden;background:#050505;}
+    .hero-banner::before{content:"";position:absolute;inset:-35%;background:radial-gradient(circle at 25% 20%,rgba(191,155,48,.25),transparent 55%),radial-gradient(circle at 75% 30%,rgba(106,13,173,.27),transparent 55%);animation:heroGradientAI 18s ease-in-out infinite alternate;pointer-events:none;}
+    .hero-banner>.hero-content{position:relative;z-index:1;}
+    @keyframes heroGradientAI{to{transform:translate3d(-6%,6%,0) scale(1.08);}}
+    /* Account Dropdown Animation */
+    #accountDropdown{animation:slideDown 0.2s ease-out}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    /* Modal Animation */
+    #loginModal,#registerModal{transition:opacity 0.3s ease}
+    #loginModal.hidden,#registerModal.hidden{opacity:0;pointer-events:none}
+    #loginModal:not(.hidden),#registerModal:not(.hidden){opacity:1}
+    #loginModal>div:last-child,#registerModal>div:last-child{animation:slideUp 0.3s ease-out}
+    @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .hero-banner{transition:background .3s ease}
+    .hero-banner::before{transition:background .3s ease}
+    .light-mode body{background:#f6f5f0;color:#1f1f1f}
+    .light-mode header{background:rgba(255,255,255,0.85);border-bottom:1px solid rgba(191,155,48,.3)}
+    .light-mode .border-gold{box-shadow:inset 0 0 12px rgba(191,155,48,.08),0 0 18px rgba(191,155,48,.1)}
+    .light-mode .bg-black{background:#ffffff!important}
+    .light-mode .bg-black\/40{background:rgba(255,255,255,0.85)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/60{background:rgba(255,255,255,0.9)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/80{background:rgba(255,255,255,0.94)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/90{background:rgba(255,255,255,0.96)!important;color:#1f1f1f!important}
+    .light-mode .bg-black\/95{background:rgba(255,255,255,0.98)!important;color:#1f1f1f!important}
+    .light-mode .hero-banner{background:#faf7ef}
+    .light-mode .hero-banner::before{background:radial-gradient(circle at 25% 20%,rgba(255,210,150,.35),transparent 55%),radial-gradient(circle at 75% 30%,rgba(180,150,255,.3),transparent 55%)}
+    .light-mode .text-zinc-300{color:#394150!important}
+    .light-mode .text-zinc-400{color:#4b5563!important}
+    .light-mode .text-zinc-500{color:#6b7280!important}
+    .light-mode [class*="border-yellow-600/20"]{border-color:rgba(191,155,48,0.28)!important}
+    .light-mode .theme-toggle{background:rgba(255,255,255,0.95);color:#7c5800;border-color:rgba(191,155,48,.45)}
+    .light-mode .theme-toggle .icon-sun{display:none}
+    .light-mode .theme-toggle .icon-moon{display:inline-block}
+    .light-mode footer{background:#faf7ef;border-top:1px solid rgba(191,155,48,0.2);color:#1f1f1f}
+  </style>
+</head>
+<body>
+  <header class="fixed top-0 inset-x-0 z-50 backdrop-blur bg-black/40 border-b border-yellow-600/20">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 h-16 flex items-center justify-between relative">
+      <a href="index.html" class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gold-gradient"></div><span class="text-xl font-semibold tracking-widest bg-gold-gradient bg-clip-text text-transparent">GetASubscription</span></a>
+      <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-6 text-sm">
+        <a href="index.html" class="hover:text-gold4 transition">Acasă</a>
+        <a href="b2b.html" class="hover:text-gold4 transition">B2B</a>
+        <a href="b2c.html" class="hover:text-gold4 transition">B2C</a>
+        <a href="cat1.html" class="hover:text-gold4 transition">Businessuri</a>
+        <a href="cat2.html" class="hover:text-gold4 transition">Servicii</a>
+        <a href="cat3.html" class="hover:text-gold4 transition">Investitori</a>
+        <a href="calls.html" class="hover:text-gold4 transition">Call-uri</a>
+        <a href="ai.html" class="hover:text-gold4 transition text-gold4">AI</a>
+        <a href="subscriptions.html" class="hover:text-gold4 transition">Subscriptions</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" type="button" class="theme-toggle" aria-label="Comută modul luminos">
+          <i class="fa-solid fa-sun icon-sun"></i>
+          <i class="fa-solid fa-moon icon-moon"></i>
+        </button>
+        <!-- Account Icon & Dropdown -->
+        <div class="relative" id="accountDropdownContainer">
+          <button id="accountBtn" class="p-2 border border-yellow-600/30 rounded-full text-gold4 hover:shadow-gold-glow transition relative">
+            <i class="fa-solid fa-user text-lg"></i>
+          </button>
+          <!-- Dropdown Menu -->
+          <div id="accountDropdown" class="hidden absolute right-0 mt-2 w-56 bg-black border-gold rounded-xl shadow-gold-glow overflow-hidden z-50">
+            <div id="accountMenuLoggedOut" class="hidden">
+              <button id="openLoginBtn" class="w-full text-left px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-sign-in-alt text-gold4"></i>
+                <span>Autentificare</span>
+              </button>
+              <button id="openRegisterBtn" class="w-full text-left px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-user-plus text-gold4"></i>
+                <span>Înregistrare</span>
+              </button>
+            </div>
+            <div id="accountMenuLoggedIn" class="hidden">
+              <div class="px-4 py-3 border-b border-yellow-600/20">
+                <p class="text-sm text-zinc-400">Conectat ca</p>
+                <p id="userNameDisplay" class="font-semibold text-gold4"></p>
+                <p id="userEmailDisplay" class="text-xs text-zinc-500"></p>
+              </div>
+              <a href="#" id="profileLink" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-user-circle text-gold4"></i>
+                <span>Profil</span>
+              </a>
+              <a href="#" id="subscriptionsLink" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-box text-gold4"></i>
+                <span>Abonamentele mele</span>
+              </a>
+              <a href="#" id="settingsLink" class="block px-4 py-3 hover:bg-gold4/10 transition flex items-center gap-3">
+                <i class="fa-solid fa-cog text-gold4"></i>
+                <span>Setări</span>
+              </a>
+              <button id="logoutBtn" class="w-full text-left px-4 py-3 hover:bg-red-500/10 transition flex items-center gap-3 text-red-400">
+                <i class="fa-solid fa-sign-out-alt"></i>
+                <span>Deconectare</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button id="menuBtn" class="md:hidden p-2 border border-yellow-600/30 rounded text-gold4"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="md:hidden hidden border-t border-yellow-600/20 bg-black/90">
+      <div class="max-w-7xl mx-auto px-4 py-3 grid grid-cols-1 gap-2 text-sm">
+        <a href="index.html" class="py-2">Acasă</a>
+        <a href="b2b.html" class="py-2">B2B</a>
+        <a href="b2c.html" class="py-2">B2C</a>
+        <a href="cat1.html" class="py-2">Businessuri</a>
+        <a href="cat2.html" class="py-2">Servicii</a>
+        <a href="cat3.html" class="py-2">Investitori</a>
+        <a href="calls.html" class="py-2">Call-uri</a>
+        <a href="ai.html" class="py-2 text-gold4">AI</a>
+        <a href="subscriptions.html" class="py-2">Subscriptions</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24 pb-24">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+      <section class="hero-banner rounded-2xl border border-yellow-600/30 shadow-gold-glow overflow-hidden p-0 mb-10">
+        <div class="hero-content relative p-8 md:p-12">
+          <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_400px_at_20%_0%,rgba(191,155,48,.18),transparent_60%)]"></div>
+          <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(500px_300px_at_10%_10%,rgba(106,13,173,.25),transparent_60%),linear-gradient(135deg,#0b0b0b,#111)] opacity-95"></div>
+          <canvas id="particlesAI" class="absolute inset-0 pointer-events-none"></canvas>
+          <div class="relative z-10">
+            <h1 class="text-3xl md:text-4xl font-extrabold"><span class="bg-gold-gradient bg-clip-text text-transparent">AI</span> Consultant</h1>
+            <p class="mt-3 text-zinc-300 max-w-3xl">Descoperă AI-ul care conectează oamenii, ideile și investițiile. Consultanță inteligentă, recomandări personalizate și potriviri rapide într-un ecosistem luxury.</p>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="reveal border-gold rounded-xl p-5 hover:shadow-gold-glow transition"><h4 class="font-semibold">Potrivire inteligentă</h4><p class="text-zinc-300 text-sm mt-1">Analizează nevoi și oferă conexiuni relevante.</p></div>
+              <div class="reveal border-gold rounded-xl p-5 hover:shadow-gold-glow transition"><h4 class="font-semibold">Insights acționabile</h4><p class="text-zinc-300 text-sm mt-1">Identifică oportunități și riscuri în timp real.</p></div>
+              <div class="reveal border-gold rounded-xl p-5 hover:shadow-gold-glow transition"><h4 class="font-semibold">Scalabil și sigur</h4><p class="text-zinc-300 text-sm mt-1">Construit pentru performanță și încredere.</p></div>
+            </div>
+            <div class="mt-8">
+              <form id="aiDemoForm" class="inline-block">
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <input id="aiQuery" type="text" class="border-gold bg-black/60 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gold4 min-w-[280px]" placeholder="Ex: Caut un partener pentru marketing..." required />
+                  <button type="submit" class="btn-gold px-6 py-3 rounded-md font-semibold"><i class="fa-solid fa-comments mr-2"></i>Încearcă AI</button>
+                </div>
+                <div id="aiError" class="mt-2 text-red-400 text-sm hidden"></div>
+                <div id="aiResponse" class="mt-4 p-4 border-gold rounded-xl bg-black/40 hidden">
+                  <p class="text-zinc-300 text-sm"><i class="fa-solid fa-robot text-gold4 mr-2"></i><span id="aiResponseText"></span></p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="bg-black pt-10">
+      <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div class="reveal grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div class="border-gold rounded-xl p-6"><div class="text-3xl font-extrabold text-gold4"><span class="counter" data-target="1200">0</span>+</div><div class="mt-1 text-zinc-400 text-sm">Conexiuni generate</div></div>
+          <div class="border-gold rounded-xl p-6"><div class="text-3xl font-extrabold text-gold4"><span class="counter" data-target="98">0</span>%</div><div class="mt-1 text-zinc-400 text-sm">Acuratețe</div></div>
+          <div class="border-gold rounded-xl p-6"><div class="text-3xl font-extrabold text-gold4"><span class="counter" data-target="35">0</span>ms</div><div class="mt-1 text-zinc-400 text-sm">Răspuns mediu</div></div>
+          <div class="border-gold rounded-xl p-6"><div class="text-3xl font-extrabold text-gold4"><span class="counter" data-target="24">0</span>/7</div><div class="mt-1 text-zinc-400 text-sm">Disponibilitate</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-black pt-10 pb-2">
+      <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <h2 class="reveal underline-gold text-3xl md:text-4xl font-bold">Cum funcționează</h2>
+        <div class="reveal grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <div class="border-gold rounded-xl p-6"><div class="text-gold4 font-semibold mb-2">1. Înțelegere</div><p class="text-zinc-300 text-sm">AI-ul mapează obiectivele tale și contextul.</p></div>
+          <div class="border-gold rounded-xl p-6"><div class="text-gold4 font-semibold mb-2">2. Analiză</div><p class="text-zinc-300 text-sm">Corelează date, validează surse și evaluează riscuri.</p></div>
+          <div class="border-gold rounded-xl p-6"><div class="text-gold4 font-semibold mb-2">3. Potrivire</div><p class="text-zinc-300 text-sm">Recomandă conexiuni, parteneri sau investiții relevante.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-black pt-2 pb-10">
+      <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div class="reveal mt-4 border-gold rounded-xl">
+          <details class="group">
+            <summary class="cursor-pointer list-none px-6 py-4 flex items-center justify-between"><span class="font-semibold">Datele sunt confidențiale?</span><i class="fa-solid fa-plus text-gold4 group-open:hidden"></i><i class="fa-solid fa-minus text-gold4 hidden group-open:inline"></i></summary>
+            <div class="px-6 pb-6 text-zinc-300">Respectăm bunele practici de securitate; datele nu sunt partajate cu terți.</div>
+          </details>
+          <details class="group border-t border-yellow-600/20">
+            <summary class="cursor-pointer list-none px-6 py-4 flex items-center justify-between"><span class="font-semibold">Pot folosi AI-ul și pe mobil?</span><i class="fa-solid fa-plus text-gold4 group-open:hidden"></i><i class="fa-solid fa-minus text-gold4 hidden group-open:inline"></i></summary>
+            <div class="px-6 pb-6 text-zinc-300">Da, experiență optimizată pentru mobil și desktop.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Robot AI assistant -->
+  <div id="aiRobot" class="robot">
+    <div class="bubble text-sm">Salut! Îți pot sugera parteneri sau oportunități. Apasă pe mine.</div>
+    <div class="robot-head" title="AI Bot">
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+    </div>
+  </div>
+
+  <footer class="bg-black border-t border-yellow-600/20 py-10">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 text-zinc-300">
+      <div><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-gold-gradient"></div><span class="text-lg font-semibold tracking-widest bg-gold-gradient bg-clip-text text-transparent">GETASUBSCRIPTION</span></div><p class="mt-3 text-sm">Luxury business platform.</p></div>
+      <div><h4 class="font-semibold text-white">Navigație</h4><ul class="mt-3 space-y-2 text-sm"><li><a href="cat1.html" class="hover:text-gold4">Businessuri</a></li><li><a href="cat2.html" class="hover:text-gold4">Servicii</a></li><li><a href="cat3.html" class="hover:text-gold4">Investitori</a></li></ul></div>
+      <div><h4 class="font-semibold text-white">Resurse</h4><ul class="mt-3 space-y-2 text-sm"><li><a href="b2b.html" class="hover:text-gold4">B2B</a></li><li><a href="b2c.html" class="hover:text-gold4">B2C</a></li><li><a href="calls.html" class="hover:text-gold4">Call-uri</a></li><li><a href="ai.html" class="hover:text-gold4">AI</a></li></ul></div>
+      <div><h4 class="font-semibold text-white">Social</h4><div class="mt-3 flex gap-4 text-xl"><a href="#" class="hover:text-gold4"><i class="fa-brands fa-linkedin"></i></a><a href="#" class="hover:text-gold4"><i class="fa-brands fa-instagram"></i></a><a href="#" class="hover:text-gold4"><i class="fa-brands fa-x-twitter"></i></a></div></div>
+    </div>
+    <div class="mt-8 text-center text-xs text-zinc-500">© <span id="year"></span> GetASubscription. Toate drepturile rezervate.</div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 z-[70] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md" id="loginOverlay"></div>
+    <div class="relative z-10 w-[95%] max-w-md bg-black border-gold rounded-2xl shadow-gold-glow p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gold-gradient">Autentificare</h2>
+        <button id="closeLoginModal" class="text-zinc-400 hover:text-gold4 transition"><i class="fa-solid fa-times text-xl"></i></button>
+      </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Email</label>
+          <input type="email" id="loginEmail" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="email@exemplu.com">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Parolă</label>
+          <input type="password" id="loginPassword" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div id="loginError" class="hidden text-red-400 text-sm"></div>
+        <button type="submit" class="w-full btn-gold px-6 py-3 rounded-md font-semibold">Autentifică-te</button>
+        <p class="text-center text-sm text-zinc-400">Nu ai cont? <button type="button" id="switchToRegister" class="text-gold4 hover:underline">Înregistrează-te</button></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="fixed inset-0 z-[70] hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-md" id="registerOverlay"></div>
+    <div class="relative z-10 w-[95%] max-w-md bg-black border-gold rounded-2xl shadow-gold-glow p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gold-gradient">Înregistrare</h2>
+        <button id="closeRegisterModal" class="text-zinc-400 hover:text-gold4 transition"><i class="fa-solid fa-times text-xl"></i></button>
+      </div>
+      <form id="registerForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Nume complet</label>
+          <input type="text" id="registerName" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="Ion Popescu">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Email</label>
+          <input type="email" id="registerEmail" required class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="email@exemplu.com">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Parolă</label>
+          <input type="password" id="registerPassword" required minlength="6" class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-300 mb-2">Confirmă parola</label>
+          <input type="password" id="registerPasswordConfirm" required minlength="6" class="w-full px-4 py-2 bg-black border border-yellow-600/30 rounded-lg focus:outline-none focus:border-gold4 text-white" placeholder="••••••••">
+        </div>
+        <div id="registerError" class="hidden text-red-400 text-sm"></div>
+        <button type="submit" class="w-full btn-gold px-6 py-3 rounded-md font-semibold">Creează cont</button>
+        <p class="text-center text-sm text-zinc-400">Ai deja cont? <button type="button" id="switchToLogin" class="text-gold4 hover:underline">Autentifică-te</button></p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const root=document.documentElement;
+    const themeToggle=document.getElementById('themeToggle');
+    const storedTheme=localStorage.getItem('themePreference');
+    if(storedTheme==='light'){root.classList.add('light-mode');}
+    updateThemeAria();
+    if(themeToggle){themeToggle.addEventListener('click',()=>{root.classList.toggle('light-mode');const isLight=root.classList.contains('light-mode');localStorage.setItem('themePreference',isLight?'light':'dark');updateThemeAria();});}
+    function updateThemeAria(){if(!themeToggle)return;const isLight=root.classList.contains('light-mode');themeToggle.setAttribute('aria-label',isLight?'Comută modul întunecat':'Comută modul luminos');}
+
+    document.getElementById('year').textContent=new Date().getFullYear();
+    const menuBtn=document.getElementById('menuBtn');const mobileMenu=document.getElementById('mobileMenu');if(menuBtn){menuBtn.addEventListener('click',()=>mobileMenu.classList.toggle('hidden'));}
+    // Reveal on scroll
+    const observer=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}})},{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+    // Particles banner
+    (function(){const c=document.getElementById('particlesAI');if(!c)return;const ctx=c.getContext('2d');const container=c.parentElement;function size(){c.width=container.clientWidth;c.height=container.clientHeight}let ps=[];function init(){ps=Array.from({length:50}).map(()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*2+0.6,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,a:0.6+Math.random()*0.4}));}function draw(){ctx.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);g.addColorStop(0,'rgba(255,207,64,'+p.a+')');g.addColorStop(1,'rgba(255,207,64,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();});requestAnimationFrame(draw);}size();init();draw();window.addEventListener('resize',()=>{size();init();});})();
+    // Counters
+    const counters=document.querySelectorAll('.counter');if(counters.length){const co=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target;const target=parseInt(el.dataset.target||'0');let cur=0;const step=Math.max(1,Math.round(target/60));const t=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(t);}el.textContent=cur.toString();},20);co.unobserve(el);})},{threshold:0.6});counters.forEach(c=>co.observe(c));}
+    // Robot toggle
+    const bot=document.getElementById('aiRobot');const head=bot?.querySelector('.robot-head');head&&head.addEventListener('click',()=>bot.classList.toggle('open'));
+    // AI Demo Form
+    document.getElementById('aiDemoForm').addEventListener('submit',function(e){e.preventDefault();const query=document.getElementById('aiQuery').value.trim();const errorEl=document.getElementById('aiError');const responseEl=document.getElementById('aiResponse');const responseText=document.getElementById('aiResponseText');errorEl.classList.add('hidden');responseEl.classList.add('hidden');if(!query||query.length<5){errorEl.textContent='Te rugăm să introduci o întrebare mai detaliată (minimum 5 caractere).';errorEl.classList.remove('hidden');return;}responseText.textContent='Bazat pe cererea ta: \"'+query+'\", îți recomand să explorezi secțiunile Businessuri, Servicii sau Investitori pentru a găsi potriviri relevante. AI-ul nostru analizează în continuu preferințele și va oferi recomandări personalizate în viitor.';responseEl.classList.remove('hidden');setTimeout(()=>{responseEl.scrollIntoView({behavior:'smooth',block:'nearest'});},100);});
+    // Authentication System
+    const accountBtn=document.getElementById('accountBtn');const accountDropdown=document.getElementById('accountDropdown');const accountMenuLoggedOut=document.getElementById('accountMenuLoggedOut');const accountMenuLoggedIn=document.getElementById('accountMenuLoggedIn');const loginModal=document.getElementById('loginModal');const registerModal=document.getElementById('registerModal');const loginForm=document.getElementById('loginForm');const registerForm=document.getElementById('registerForm');const logoutBtn=document.getElementById('logoutBtn');
+    function checkAuth(){const user=localStorage.getItem('currentUser');if(user){const userData=JSON.parse(user);accountMenuLoggedOut.classList.add('hidden');accountMenuLoggedIn.classList.remove('hidden');document.getElementById('userNameDisplay').textContent=userData.name;document.getElementById('userEmailDisplay').textContent=userData.email;}else{accountMenuLoggedOut.classList.remove('hidden');accountMenuLoggedIn.classList.add('hidden');}}
+    function closeDropdown(){accountDropdown.classList.add('hidden');}
+    accountBtn.addEventListener('click',(e)=>{e.stopPropagation();accountDropdown.classList.toggle('hidden');});
+    document.addEventListener('click',(e)=>{if(!e.target.closest('#accountDropdownContainer'))closeDropdown();});
+    function openLoginModal(){registerModal.classList.add('hidden');loginModal.classList.remove('hidden');loginModal.classList.add('flex');document.getElementById('loginError').classList.add('hidden');}
+    function closeLoginModal(){loginModal.classList.add('hidden');loginModal.classList.remove('flex');}
+    function openRegisterModal(){loginModal.classList.add('hidden');registerModal.classList.remove('hidden');registerModal.classList.add('flex');document.getElementById('registerError').classList.add('hidden');}
+    function closeRegisterModal(){registerModal.classList.add('hidden');registerModal.classList.remove('flex');}
+    document.getElementById('openLoginBtn').addEventListener('click',()=>{closeDropdown();openLoginModal();});
+    document.getElementById('openRegisterBtn').addEventListener('click',()=>{closeDropdown();openRegisterModal();});
+    document.getElementById('closeLoginModal').addEventListener('click',closeLoginModal);
+    document.getElementById('closeRegisterModal').addEventListener('click',closeRegisterModal);
+    document.getElementById('loginOverlay').addEventListener('click',closeLoginModal);
+    document.getElementById('registerOverlay').addEventListener('click',closeRegisterModal);
+    document.getElementById('switchToRegister').addEventListener('click',openRegisterModal);
+    document.getElementById('switchToLogin').addEventListener('click',openLoginModal);
+    loginForm.addEventListener('submit',(e)=>{e.preventDefault();const email=document.getElementById('loginEmail').value.trim();const password=document.getElementById('loginPassword').value;const errorEl=document.getElementById('loginError');const users=JSON.parse(localStorage.getItem('users')||'[]');const user=users.find(u=>u.email===email&&u.password===password);if(user){localStorage.setItem('currentUser',JSON.stringify({name:user.name,email:user.email}));checkAuth();closeLoginModal();loginForm.reset();}else{errorEl.textContent='Email sau parolă incorectă.';errorEl.classList.remove('hidden');}});
+    registerForm.addEventListener('submit',(e)=>{e.preventDefault();const name=document.getElementById('registerName').value.trim();const email=document.getElementById('registerEmail').value.trim();const password=document.getElementById('registerPassword').value;const passwordConfirm=document.getElementById('registerPasswordConfirm').value;const errorEl=document.getElementById('registerError');if(password!==passwordConfirm){errorEl.textContent='Parolele nu coincid.';errorEl.classList.remove('hidden');return;}if(password.length<6){errorEl.textContent='Parola trebuie să aibă cel puțin 6 caractere.';errorEl.classList.remove('hidden');return;}const users=JSON.parse(localStorage.getItem('users')||'[]');if(users.find(u=>u.email===email)){errorEl.textContent='Acest email este deja înregistrat.';errorEl.classList.remove('hidden');return;}users.push({name,email,password});localStorage.setItem('users',JSON.stringify(users));localStorage.setItem('currentUser',JSON.stringify({name,email}));checkAuth();closeRegisterModal();registerForm.reset();});
+    logoutBtn.addEventListener('click',()=>{localStorage.removeItem('currentUser');checkAuth();closeDropdown();});
+    checkAuth();
+  </script>
+</body>
+</html>
+
+
